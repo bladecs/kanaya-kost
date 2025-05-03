@@ -1,0 +1,43 @@
+.auth-form-container {
+    position: relative;
+    min-height: 610px;
+    overflow: hidden;
+}
+.auth-form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+}
+.login-form {
+    opacity: 1;
+    transform: translateX(0);
+}
+.register-form {
+    opacity: 0;
+    transform: translateX(30px);
+    pointer-events: none;
+}
+.login-form.hide-forward {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+.register-form.show-forward {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+}
+.register-form.hide-backward {
+    opacity: 0;
+    transform: translateX(30px);
+}
+.login-form.show-backward {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+}
+.height-transition {
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
