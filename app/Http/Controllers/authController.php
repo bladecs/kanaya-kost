@@ -18,6 +18,7 @@ class AuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/',
+                'phone' => 'required|string|max:15|unique:users',
             ], [
                 'password.regex' => 'Password must contain at least one uppercase, one lowercase, one number and one special character'
             ]);
@@ -35,6 +36,7 @@ class AuthController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'phone' => $validated['phone'],
             ]);
 
             // Log in the user after registration
@@ -66,6 +68,11 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            $user = Auth::user();
+            if ($user->email === 'admin@gmail.com') { // Replace with your admin email
+                return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome Admin!');
+            }
+
             return redirect()->intended(route('dashboard'))->with('success', 'Login successful!');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
@@ -79,6 +86,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'You have been logged out successfully.');
+        return redirect('/login')->with('success', 'You have been logged out successfully.');
     }
 }
