@@ -24,6 +24,7 @@
             position: sticky;
             top: 1rem;
         }
+
         .dropdown-menu {
             opacity: 0;
             z-index: 60 !important;
@@ -47,8 +48,10 @@
             <div class="flex items-center justify-between">
                 <!-- Back Button - Left Side -->
                 <div class="flex-1">
-                    <a href="{{ route('listroom') }}" class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
-                        <div class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full mr-2 group-hover:bg-white/30 transition-colors duration-200">
+                    <a href="{{ route('dashboard') }}"
+                        class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
+                        <div
+                            class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full mr-2 group-hover:bg-white/30 transition-colors duration-200">
                             <i class="fas fa-arrow-left text-white group-hover:text-amber-100"></i>
                         </div>
                         <span class="text-white group-hover:text-amber-100 font-medium">
@@ -71,31 +74,42 @@
                         <!-- Notification Bell -->
                         <button class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
                             <i class="fas fa-bell text-lg text-white"></i>
-                            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1">3</span>
+                            <span
+                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1">3</span>
                         </button>
 
                         <!-- Message Button -->
-                        <button @click="chatOpen = !chatOpen" class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
+                        <button @click="chatOpen = !chatOpen"
+                            class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
                             <i class="fas fa-envelope text-lg text-white"></i>
-                            <span x-show="unreadMessages > 0" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1" x-text="unreadMessages"></span>
+                            <span x-show="unreadMessages > 0"
+                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1"
+                                x-text="unreadMessages"></span>
                         </button>
 
                         <!-- User Profile -->
                         <div x-data="{ open: false }" class="relative">
-                            <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-                                <div class="relative">
-                                    <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg"
-                                        alt="User profile">
-                                </div>
-                                <span class="hidden md:inline-block">John Doe</span>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-200"
-                                    :class="{ 'transform rotate-180': open }"></i>
-                            </button>
-        
+                            @auth
+                                <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+                                    <div class="relative">
+                                        <img class="h-8 w-8 rounded-full"
+                                            src="https://randomuser.me/api/portraits/men/32.jpg" alt="User profile">
+                                    </div>
+                                    <span class="hidden md:inline-block">{{ Auth::user()->name }}</span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                        :class="{ 'transform rotate-180': open }"></i>
+                                </button>
+                            @else
+                                <a href="{{ route('login.page') }}"
+                                    class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600">
+                                    Login
+                                </a>
+                            @endauth
+
                             <div x-show="open" @click.away="open = false"
                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 dropdown-menu"
                                 :class="{ 'show': open }">
-                                <a href="{{ route('profileuser') }}"
+                                <a href="{{ route('profileuser') }}?previous={{ urlencode(request()->path()) }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 cursor-pointer">
                                     <i class="fas fa-user mr-2 text-gray-500"></i> Profile
                                 </a>
@@ -137,9 +151,12 @@
                         <img :src="room.mainImage" alt="Kamar" class="w-full h-full object-cover">
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
                             <template x-for="(img, index) in room.images" :key="index">
-                                <button @click="room.mainImage = img"
-                                    class="w-12 h-12 rounded overflow-hidden border-2"
-                                    :class="{'border-amber-500': room.mainImage === img, 'border-transparent': room.mainImage !== img}">
+                                <button @click="room.mainImage = img" class="w-12 h-12 rounded overflow-hidden border-2"
+                                    :class="{
+                                        'border-amber-500': room.mainImage === img,
+                                        'border-transparent': room
+                                            .mainImage !== img
+                                    }">
                                     <img :src="img" class="w-full h-full object-cover">
                                 </button>
                             </template>
@@ -170,10 +187,6 @@
                             <h2 class="text-xl font-semibold text-gray-800 mb-3">Spesifikasi</h2>
                             <ul class="space-y-2 text-gray-600">
                                 <li class="flex items-center">
-                                    <i class="fas fa-ruler-combined text-amber-500 w-6"></i>
-                                    <span x-text="room.size + ' m²'"></span>
-                                </li>
-                                <li class="flex items-center">
                                     <i class="fas fa-bed text-amber-500 w-6"></i>
                                     <span x-text="room.bedType"></span>
                                 </li>
@@ -200,16 +213,6 @@
                             </template>
                         </div>
                     </div>
-
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-800 mb-3">Lokasi</h2>
-                        <p class="text-gray-600 mb-4" x-text="room.location"></p>
-                        <div class="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-                            <!-- Ganti dengan API Maps yang sesungguhnya -->
-                            <img src="https://maps.googleapis.com/maps/api/staticmap?center=-6.2088,106.8456&zoom=16&size=800x400&maptype=roadmap&markers=color:red%7C-6.2088,106.8456&key=YOUR_API_KEY"
-                                alt="Location Map" class="w-full h-full object-cover">
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -222,16 +225,19 @@
                         <div class="space-y-4 mb-6">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Harga per bulan:</span>
-                                <span class="font-semibold" x-text="'Rp ' + room.price.toLocaleString('id-ID')"></span>
+                                <span class="font-semibold"
+                                    x-text="'Rp ' + room.price.toLocaleString('id-ID')"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Durasi sewa:</span>
                                 <div class="flex items-center space-x-2">
-                                    <button @click="duration > 1 ? duration-- : duration" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">
+                                    <button @click="duration > 1 ? duration-- : duration"
+                                        class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">
                                         <i class="fas fa-minus text-gray-500"></i>
                                     </button>
                                     <span x-text="duration + ' bulan'"></span>
-                                    <button @click="duration++" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">
+                                    <button @click="duration++"
+                                        class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">
                                         <i class="fas fa-plus text-gray-500"></i>
                                     </button>
                                 </div>
@@ -243,9 +249,17 @@
                             </div>
                         </div>
 
-                        <button @click="openChatWithAdmin" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300">
-                            Pesan Sekarang
-                        </button>
+                        @auth
+                            <button @click="openChatWithAdmin"
+                                class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300">
+                                Pesan Sekarang
+                            </button>
+                        @else
+                            <a href="{{ route('login.page', ['previous' => url()->current()]) }}"
+                                class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300 text-center block">
+                                Login untuk Pesan
+                            </a>
+                        @endauth
 
                         <div class="mt-4 text-center text-sm text-gray-500">
                             <p>Anda akan dihubungi admin untuk konfirmasi pemesanan</p>
@@ -261,11 +275,13 @@
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-phone text-amber-500 w-6"></i>
-                                <a :href="'tel:' + room.admin.phone" x-text="room.admin.phone" class="hover:text-amber-600"></a>
+                                <a :href="'tel:' + room.admin.phone" x-text="room.admin.phone"
+                                    class="hover:text-amber-600"></a>
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-envelope text-amber-500 w-6"></i>
-                                <a :href="'mailto:' + room.admin.email" x-text="room.admin.email" class="hover:text-amber-600"></a>
+                                <a :href="'mailto:' + room.admin.email" x-text="room.admin.email"
+                                    class="hover:text-amber-600"></a>
                             </div>
                         </div>
                     </div>
@@ -275,10 +291,9 @@
     </div>
 
     <!-- Chat Sidebar -->
-    <div x-show="chatOpen"
-        @click.away="chatOpen = false"
+    <div x-show="chatOpen" @click.away="chatOpen = false"
         class="chat-sidebar fixed top-0 right-0 w-full md:w-96 h-full bg-white shadow-lg z-50 p-4"
-        :class="{'open': chatOpen}">
+        :class="{ 'open': chatOpen }">
         <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
             <h3 class="text-lg font-semibold flex items-center">
                 <img :src="room.admin.avatar" class="w-8 h-8 rounded-full mr-2">
@@ -292,11 +307,21 @@
 
         <div class="chat-messages h-[calc(100%-120px)] overflow-y-auto mb-4 space-y-4">
             <template x-for="(message, index) in messages" :key="index">
-                <div :class="{'flex justify-end': message.sender === 'user', 'flex': message.sender === 'admin'}">
-                    <div :class="{'bg-amber-600 text-white': message.sender === 'user', 'bg-gray-100': message.sender === 'admin'}"
+                <div
+                    :class="{ 'flex justify-end': message.sender === 'user', 'flex': message.sender === 'admin' }">
+                    <div :class="{
+                        'bg-amber-600 text-white': message.sender === 'user',
+                        'bg-gray-100': message
+                            .sender === 'admin'
+                    }"
                         class="max-w-xs md:max-w-md rounded-lg p-3">
                         <p x-text="message.text"></p>
-                        <p class="text-xs mt-1" :class="{'text-amber-200': message.sender === 'user', 'text-gray-500': message.sender === 'admin'}"
+                        <p class="text-xs mt-1"
+                            :class="{
+                                'text-amber-200': message.sender === 'user',
+                                'text-gray-500': message
+                                    .sender === 'admin'
+                            }"
                             x-text="message.time"></p>
                     </div>
                 </div>
@@ -341,20 +366,22 @@
                     }
                 ],
                 room: {
-                    id: 3,
-                    name: "Kamar Executive",
-                    price: 3500000,
+                    name: "Kamar Normal",
+                    price: 1500000,
                     rating: 5,
                     reviews: 5,
-                    size: 25,
-                    type: "Executive",
+                    type: "Normal",
                     available: 2,
-                    description: "Kamar mewah dengan tempat tidur king size, ruang kerja terpisah, kamar mandi mewah, dan balkon pribadi dengan pemandangan kota. Kamar ini sangat cocok untuk profesional yang menginginkan kenyamanan maksimal.",
-                    mainImage: "img/ph3.jpg",
-                    images: ["img/ph3.jpg", "img/ph3-2.jpg", "img/ph3-3.jpg", "img/ph3-4.jpg"],
-                    bedType: "King Size Bed",
-                    bathroom: "Kamar mandi mewah dengan bathtub",
-                    facilities: ["AC", "WiFi Gratis", "Kamar Mandi Mewah", "Ruang Kerja", "TV 32 inch", "Balkon Pribadi", "Kulkas Mini", "Lemari Besar", "Meja Rias", "Parkir Mobil"],
+                    description: "Kamar dengan tempat tidur single size, kamar mandi dengan shower, dan balkon dilantai 3 dan 4 dengan pemandangan kota. Kamar ini sangat cocok untuk pekerjaa maupun mahasiswa yang menginginkan kenyamanan maksimal.",
+                    mainImage: "img/isi kamar (2).jpg",
+                    images: ["img/isi kamar (2).jpg", "img/isi kamar (3).jpg", "img/toilet.jpg", "img/balkon lantai 3.jpg",
+                        "img/balkon lantai 4.jpg", "img/parkiran dalam (2).jpg", "img/lorong lantai 4.jpg"
+                    ],
+                    bedType: "Single Size Bed",
+                    bathroom: "Kamar mandi dengan shower",
+                    facilities: ["AC", "WiFi Gratis", "Kamar Mandi Dalam", "Balkon", "Lemari Besar", "Parkir Mobil",
+                        "Wastafel"
+                    ],
                     location: "Jl. Garuda No. 123, Lantai 3, Blok C, Jakarta Pusat",
                     admin: {
                         name: "Ibu Siti",

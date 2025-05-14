@@ -45,7 +45,7 @@
             <div class="flex items-center justify-between">
                 <!-- Back Button - Left Side -->
                 <div class="flex-1">
-                    <a href="{{ route('listroom') }}" class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
+                    <a href="{{ route($previous_url) }}" class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
                         <div class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full mr-2 group-hover:bg-white/30 transition-colors duration-200">
                             <i class="fas fa-arrow-left text-white group-hover:text-amber-100"></i>
                         </div>

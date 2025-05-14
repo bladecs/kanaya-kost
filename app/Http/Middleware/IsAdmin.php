@@ -9,7 +9,7 @@ class IsAdmin
     public function handle($request, Closure $next)
     {
         // Cek apakah user login dan email-nya admin
-        if (Auth::check() && Auth::user()->email === 'admin@gmail.com') {
+        if (Auth::check() && Auth::user()->role === 'admin') {
             return $next($request);
         }
         // Kalau bukan admin, redirect

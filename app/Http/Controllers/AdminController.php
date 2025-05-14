@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoomModels;
 use App\Models\FacilityModel;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ class AdminController extends Controller
     {
         $rooms = RoomModels::with('facilities')->get();
         $customer = User::where('role', 'customer')->get();
-        return view('admin.dashboard', compact('rooms','customer'));
+        return view('admin.dashboard', compact('rooms', 'customer'));
     }
 
     // Menyimpan kamar baru (dari modal)

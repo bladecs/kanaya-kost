@@ -63,6 +63,7 @@
                         <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Sign In</h2>
                         <form method="POST" action="{{ route('login') }}" class="space-y-6">
                             @csrf
+                            <input type="hidden" name="previous" value="{{ $request->input('previous', old('previous')) }}">
                             <div>
                                 <label for="login-email" class="block text-sm font-medium text-gray-700">Email Address</label>
                                 <input id="login-email" name="email" type="email" autocomplete="email" required
