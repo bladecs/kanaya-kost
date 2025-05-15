@@ -59,6 +59,7 @@ class AuthController extends Controller
             ]);
 
             $remember = $request->has('remember');
+            $previousUrl = $request->input('previous', route('dashboard')); // Default ke dashboard
 
             if (!Auth::attempt($credentials, $remember)) {
                 throw ValidationException::withMessages([
@@ -68,14 +69,36 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // Simpan data user ke session
+            $request->session()->put([
+                'user_id' => Auth::id(),
+                'user_name' => Auth::user()->name,
+                'user_email' => Auth::user()->email
+            ]);
+
             $user = Auth::user();
-            if ($user->email === 'admin@gmail.com') { // Replace with your admin email
-                return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome Admin!');
+
+            // Jika admin, redirect ke dashboard admin
+            if ($user->role === 'admin') {
+                return redirect()
+                    ->to(route('admin.dashboard'))
+                    ->with([
+                        'success' => 'Welcome Admin!',
+                        'user_name' => $user->name
+                    ]);
             }
 
-            return redirect()->intended(route('dashboard'))->with('success', 'Login successful!');
+            return redirect()
+                ->intended(route('dashboard'))
+                ->with([
+                    'success' => 'Login successful!',
+                    'user_name' => $user->name
+                ]);
         } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
+            return back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('show_login', true);
         }
     }
 
@@ -86,6 +109,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'You have been logged out successfully.');
+        return redirect('/')->with('success', 'You have been logged out successfully.');
     }
 }

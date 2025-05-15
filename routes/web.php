@@ -2,36 +2,38 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\authController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Http\Controllers\MessageController;
 
-// Route tampilan login & register
-Route::get('/login', function () {
-    return view('auth.auth');
+// Rute yang bisa diakses SEMUA ORANG (tanpa middleware)
+Route::get('/', function () {
+    return view('dashboard.index');
+})->name('dashboard');
+
+Route::get('/list-room', function () {
+    return view('dashboard.list-room');
+})->name('listroom');
+
+Route::get('/detailroom', function () {
+    return view('dashboard.detail-room');
+})->name('detailroom');
+
+// Rute untuk GUEST (hanya bisa diakses jika BELUM LOGIN)
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', function (Request $request) {
+        return view('auth.auth', ['request' => $request]);
+    })->name('login.page');
+
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
 });
-// Route untuk proses login
-Route::post('/login', [authController::class, 'login'])->name('login');
-// Route untuk proses register
-Route::post('/register', [authController::class, 'register'])->name('register');
-// Route untuk proses logout
-Route::get('/logout', [authController::class, 'logout'])->name('logout');
 
-// Route tampilan dashboard
+// Rute untuk USER yang sudah login (hanya bisa diakses jika SUDAH LOGIN)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard.index');
-    })->name('dashboard');
-
-    Route::get('/list-room', function () {
-        return view('dashboard.list-room');
-    })->name('listroom');
-
-    Route::get('/detail-room', function () {
-        return view('dashboard.detail-room');
-    })->name('detailroom');
-
-    Route::get('/profile-user', function () {
-        return view('dashboard.profile');
-    })->name('profileuser');
+    Route::get('/profile-user', [CustomerController::class, 'profile'])->name('profileuser');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // Middleware group for admin
@@ -41,3 +43,6 @@ Route::middleware(['auth', 'IsAdmin'])->group(function () {
     Route::post('/update-room', [AdminController::class, 'update'])->name('room.update');
     Route::post('/delete-room', [AdminController::class, 'destroy'])->name('room.delete');
 });
+
+Route::get('/messages', [MessageController::class, 'index']);
+Route::post('/messages', [MessageController::class, 'store']);
