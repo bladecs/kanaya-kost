@@ -16,9 +16,7 @@ Route::get('/list-room', function () {
     return view('dashboard.list-room');
 })->name('listroom');
 
-Route::get('/detailroom', function () {
-    return view('dashboard.detail-room');
-})->name('detailroom');
+Route::get('/detailroom', [CustomerController::class,'rooms'])->name('detailroom');
 
 // Rute untuk GUEST (hanya bisa diakses jika BELUM LOGIN)
 Route::middleware(['guest'])->group(function () {
@@ -42,7 +40,11 @@ Route::middleware(['auth', 'IsAdmin'])->group(function () {
     Route::post('/add-room', [AdminController::class, 'store'])->name('room.store');
     Route::post('/update-room', [AdminController::class, 'update'])->name('room.update');
     Route::post('/delete-room', [AdminController::class, 'destroy'])->name('room.delete');
+    Route::get('/users',[AdminController::class, 'user'])->name('user');
 });
 
 Route::get('/messages', [MessageController::class, 'index']);
 Route::post('/messages', [MessageController::class, 'store']);
+Route::post('/messages/{userId}/mark-as-read', [MessageController::class, 'markAsRead']);
+Route::get('/user/messages', [MessageController::class, 'userMessages']);
+Route::post('/user/messages/mark-as-read', [MessageController::class, 'markUserMessagesAsRead']);

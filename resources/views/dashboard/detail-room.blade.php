@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>KANAYA KOST - Detail Kamar</title>
     <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,6 +38,21 @@
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
+        }
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -79,13 +95,32 @@
                         </button>
 
                         <!-- Message Button -->
-                        <button @click="chatOpen = !chatOpen"
-                            class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
-                            <i class="fas fa-envelope text-lg text-white"></i>
-                            <span x-show="unreadMessages > 0"
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1"
-                                x-text="unreadMessages"></span>
-                        </button>
+                        <div x-data="{ dropdownOpen: false }" class="relative">
+                            <button @click="dropdownOpen = !dropdownOpen"
+                                class="p-2 rounded-full hover:bg-amber-600 transition duration-300 relative">
+                                <i class="fas fa-envelope text-lg"></i>
+                                <span x-show="unreadCount > 0" class="notification-badge" x-text="unreadCount"></span>
+                            </button>
+
+                            <div x-show="dropdownOpen" @click.away="dropdownOpen = false"
+                                class="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg py-1 z-50">
+                                <div class="px-4 py-2 border-b border-gray-200">
+                                    <h3 class="text-sm font-semibold text-gray-800">Messages</h3>
+                                </div>
+                                <div class="max-h-60 overflow-y-auto">
+                                    <a href="#" @click.prevent="dropdownOpen = false; $dispatch('open-chat')"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
+                                        <div class="flex items-center">
+                                            <img class="h-8 w-8 rounded-full"
+                                                src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin">
+                                            <div class="ml-3">
+                                                <p class="font-medium">Admin Kost</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- User Profile -->
                         <div x-data="{ open: false }" class="relative">
@@ -151,7 +186,8 @@
                         <img :src="room.mainImage" alt="Kamar" class="w-full h-full object-cover">
                         <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
                             <template x-for="(img, index) in room.images" :key="index">
-                                <button @click="room.mainImage = img" class="w-12 h-12 rounded overflow-hidden border-2"
+                                <button @click="room.mainImage = img"
+                                    class="w-12 h-12 rounded overflow-hidden border-2"
                                     :class="{
                                         'border-amber-500': room.mainImage === img,
                                         'border-transparent': room
@@ -168,14 +204,6 @@
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <div class="flex justify-between items-start mb-4">
                         <h1 class="text-2xl font-bold text-gray-800" x-text="room.name"></h1>
-                        <div class="flex items-center">
-                            <div class="flex text-yellow-400 mr-2">
-                                <template x-for="i in 5" :key="i">
-                                    <i :class="i <= room.rating ? 'fas fa-star' : 'far fa-star'"></i>
-                                </template>
-                            </div>
-                            <span class="text-gray-600" x-text="room.reviews + ' reviews'"></span>
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -250,10 +278,18 @@
                         </div>
 
                         @auth
-                            <button @click="openChatWithAdmin"
-                                class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300">
-                                Pesan Sekarang
-                            </button>
+                            @if ($available_rooms <= 0)
+                                <button
+                                    class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300"
+                                    disabled>
+                                    Kamar sudah penuh
+                                </button>
+                            @else
+                                <button @click="openChatWithAdmin"
+                                    class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300">
+                                    Pesan Sekarang
+                                </button>
+                            @endif
                         @else
                             <a href="{{ route('login.page', ['previous' => url()->current()]) }}"
                                 class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition duration-300 text-center block">
@@ -265,74 +301,62 @@
                             <p>Anda akan dihubungi admin untuk konfirmasi pemesanan</p>
                         </div>
                     </div>
-
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">Kontak Admin</h2>
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <i class="fas fa-user text-amber-500 w-6"></i>
-                                <span x-text="room.admin.name"></span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-phone text-amber-500 w-6"></i>
-                                <a :href="'tel:' + room.admin.phone" x-text="room.admin.phone"
-                                    class="hover:text-amber-600"></a>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-envelope text-amber-500 w-6"></i>
-                                <a :href="'mailto:' + room.admin.email" x-text="room.admin.email"
-                                    class="hover:text-amber-600"></a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Chat Sidebar -->
-    <div x-show="chatOpen" @click.away="chatOpen = false"
-        class="chat-sidebar fixed top-0 right-0 w-full md:w-96 h-full bg-white shadow-lg z-50 p-4"
-        :class="{ 'open': chatOpen }">
-        <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
-            <h3 class="text-lg font-semibold flex items-center">
-                <img :src="room.admin.avatar" class="w-8 h-8 rounded-full mr-2">
-                <span x-text="room.admin.name"></span>
-                <span class="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>
-            </h3>
-            <button @click="chatOpen = false" class="text-gray-500 hover:text-gray-700">
+    <!-- Message Sidebar -->
+    <div x-data="messageComponent" x-on:open-chat.window="chatOpen = true" id="message-sidebar" x-show="chatOpen"
+        x-transition class="fixed right-0 top-0 h-full w-full md:w-1/3 bg-white shadow-lg border-l border-gray-200">
+
+        <!-- Chat Header -->
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-amber-500 text-white">
+            <div class="flex items-center">
+                <img src="https://randomuser.me/api/portraits/women/32.jpg"
+                    class="w-10 h-10 rounded-full object-cover mr-3" alt="Admin Kost">
+                <div>
+                    <h3 class="font-semibold">Admin Kost</h3>
+                    <p class="text-xs text-amber-100">Online</p>
+                </div>
+            </div>
+            <button @click="chatOpen = false" class="py-3 px-5 rounded-xl hover:bg-amber-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
-        <div class="chat-messages h-[calc(100%-120px)] overflow-y-auto mb-4 space-y-4">
-            <template x-for="(message, index) in messages" :key="index">
-                <div
-                    :class="{ 'flex justify-end': message.sender === 'user', 'flex': message.sender === 'admin' }">
-                    <div :class="{
-                        'bg-amber-600 text-white': message.sender === 'user',
-                        'bg-gray-100': message
-                            .sender === 'admin'
-                    }"
-                        class="max-w-xs md:max-w-md rounded-lg p-3">
-                        <p x-text="message.text"></p>
-                        <p class="text-xs mt-1"
-                            :class="{
-                                'text-amber-200': message.sender === 'user',
-                                'text-gray-500': message
-                                    .sender === 'admin'
-                            }"
-                            x-text="message.time"></p>
+        <!-- Chat Container -->
+        <div class="chat-container overflow-y-auto p-4 h-[calc(100%-120px)]">
+            <div class="space-y-4" x-ref="messagesContainer">
+                <template x-for="msg in messages" :key="msg.id">
+                    <div :class="msg.is_admin == 1 ? 'flex justify-start' : 'flex justify-end'">
+                        <div class="flex items-end space-x-2"
+                            :class="msg.is_admin == 1 ? '' : 'flex-row-reverse space-x-reverse'">
+                            <img :src="msg.is_admin == 1 ?
+                                'https://randomuser.me/api/portraits/men/42.jpg' :
+                                (messages.find(c => c.user_id == 4)?.user?.photo ||
+                                    'https://randomuser.me/api/portraits/men/1.jpg')"
+                                class="w-8 h-8 rounded-full border border-amber-200 shadow">
+                            <div>
+                                <div :class="msg.is_admin == 1 ? 'bg-gray-100 text-gray-800' :
+                                    'bg-amber-500 text-white'"
+                                    class="px-4 py-2 rounded-2xl shadow max-w-xs break-words">
+                                    <span x-text="msg.content"></span>
+                                </div>
+                                <div class="text-xs text-gray-400 mt-1" x-text="formatTime(msg.created_at)"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
         </div>
 
-        <div class="chat-input border-t border-gray-200">
-            <form @submit.prevent="sendMessage" class="flex">
-                <input x-model="newMessage" type="text" placeholder="Ketik pesan..."
+        <!-- Message Input -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+            <form @submit.prevent="sendMessage" class="flex items-center">
+                <input type="text" x-model="newMessage" placeholder="Type your message..."
                     class="flex-1 border border-gray-300 rounded-l-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                <button type="submit" class="bg-amber-600 text-white px-4 py-2 rounded-r-lg hover:bg-amber-700">
+                <button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-r-lg hover:bg-amber-600">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </form>
@@ -349,29 +373,15 @@
                 unreadMessages: 2,
                 duration: 1,
                 newMessage: '',
-                messages: [{
-                        sender: 'admin',
-                        text: 'Halo, ada yang bisa saya bantu?',
-                        time: '10:30 AM'
-                    },
-                    {
-                        sender: 'user',
-                        text: 'Saya tertarik dengan kamar Executive, apakah masih tersedia untuk bulan depan?',
-                        time: '10:32 AM'
-                    },
-                    {
-                        sender: 'admin',
-                        text: 'Masih tersedia 2 kamar untuk bulan depan. Untuk pemesanan bisa datang langsung atau via WhatsApp',
-                        time: '10:35 AM'
-                    }
-                ],
+                messages: [],
+                autoMessage: '',
                 room: {
                     name: "Kamar Normal",
                     price: 1500000,
                     rating: 5,
                     reviews: 5,
                     type: "Normal",
-                    available: 2,
+                    available: @json($available_rooms),
                     description: "Kamar dengan tempat tidur single size, kamar mandi dengan shower, dan balkon dilantai 3 dan 4 dengan pemandangan kota. Kamar ini sangat cocok untuk pekerjaa maupun mahasiswa yang menginginkan kenyamanan maksimal.",
                     mainImage: "img/isi kamar (2).jpg",
                     images: ["img/isi kamar (2).jpg", "img/isi kamar (3).jpg", "img/toilet.jpg", "img/balkon lantai 3.jpg",
@@ -390,46 +400,138 @@
                         avatar: "https://randomuser.me/api/portraits/women/68.jpg"
                     }
                 },
+                init() {
+                    this.loadMessages();
+                    this.startFetching();
+                },
+
+                startFetching() {
+                    // Clear interval if already set
+                    if (this.fetchInterval) clearInterval(this.fetchInterval);
+                    this.fetchInterval = setInterval(() => {
+                        if (this.chatOpen) {
+                            this.loadMessages();
+                        }
+                    }, 1000);
+                },
                 openChatWithAdmin() {
                     this.chatOpen = true;
                     this.unreadMessages = 0;
 
-                    // Auto reply from admin after 2 seconds
-                    setTimeout(() => {
-                        this.messages.push({
-                            sender: 'admin',
-                            text: 'Terima kasih atas minat Anda pada Kamar Executive. Berapa lama Anda ingin menyewa?',
-                            time: new Date().toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
+                    fetch('/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                user_id: {{ auth()->id() }},
+                                is_admin: false,
+                                content: `Halo admin, saya ingin memesan kamar ini untuk ${this.duration} bulan. Apakah kamar masih tersedia?`
                             })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => {
+                                    throw err;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.messages.push({
+                                sender: 'user',
+                                text: `Halo admin, saya ingin memesan kamar ini untuk ${this.duration} bulan. Apakah kamar masih tersedia?`,
+                                time: new Date().toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Gagal mengirim pesan: ' + (error.message ||
+                                'Terjadi kesalahan'));
                         });
+                },
+                loadMessages() {
+                    console.log({{ Auth()->id() }});
+                    fetch('/user/messages')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.messages = data.messages;
+                            this.unreadCount = data.unread_count;
+                            this.scrollToBottom();
+                        })
+                        .catch(error => {
+                            console.error('Error loading messages:', error);
+                            this.messages = [{
+                                content: "Gagal memuat pesan. Silakan coba lagi.",
+                                is_admin: true,
+                                created_at: new Date().toISOString()
+                            }];
+                        });
+                },
 
-                        // Scroll to bottom
-                        const chatContainer = document.querySelector('.chat-messages');
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }, 2000);
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        const container = this.$refs.messagesContainer;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
                 },
                 sendMessage() {
-                    if (this.newMessage.trim() === '') return;
+                    if (!this.newMessage.trim()) return;
 
-                    this.messages.push({
-                        sender: 'user',
-                        text: this.newMessage,
-                        time: new Date().toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
+                    fetch('/messages', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                user_id: {{ auth()->id() }},
+                                is_admin: false,
+                                content: this.newMessage
+                            })
                         })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => {
+                                    throw err;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.messages.push(data);
+                            this.newMessage = '';
+                            this.scrollToBottom();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Gagal mengirim pesan: ' + (error.message ||
+                                'Terjadi kesalahan'));
+                        });
+                },
+
+                formatTime(timestamp) {
+                    const date = new Date(timestamp);
+                    return date.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
-
-                    this.newMessage = '';
-
-                    // Scroll to bottom
-                    setTimeout(() => {
-                        const chatContainer = document.querySelector('.chat-messages');
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }, 100);
-                }
+                },
             }
         }
     </script>

@@ -90,7 +90,7 @@
 
         .notification-badge {
             position: absolute;
-            top: -5px;
+            top: 5px;
             right: -5px;
             background-color: #ef4444;
             color: white;
@@ -130,7 +130,7 @@
     <!-- Navbar -->
     <div id="navbar"
         class="fixed top-0 left-0 w-full bg-gradient-to-r from-amber-500 to-amber-400 text-white shadow-lg z-50 navbar-visible">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div x-data="messageComponent" class="container mx-auto px-6 py-4 flex justify-between items-center" >
             <div class="flex items-center space-x-2">
                 <i class="fas fa-home text-2xl"></i>
                 <h1 class="text-xl font-bold">KANAYA KOST</h1>
@@ -201,7 +201,7 @@
                         <button @click="dropdownOpen = !dropdownOpen"
                             class="p-2 rounded-full hover:bg-amber-600 transition duration-300 relative">
                             <i class="fas fa-envelope text-lg"></i>
-                            <span class="notification-badge">1</span>
+                            <span x-show="unreadCount > 0" class="notification-badge" x-text="unreadCount"></span>
                         </button>
 
                         <div x-show="dropdownOpen" @click.away="dropdownOpen = false"
@@ -210,7 +210,7 @@
                                 <h3 class="text-sm font-semibold text-gray-800">Messages</h3>
                             </div>
                             <div class="max-h-60 overflow-y-auto">
-                                <a href="#" @click.prevent="dropdownOpen = false; $dispatch('open-chat')"
+                                <a href="#" @click.prevent="dropdownOpen = false; $dispatch('open-chat'); markAsRead()"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
                                     <div class="flex items-center">
                                         <img class="h-8 w-8 rounded-full"
@@ -488,8 +488,8 @@
                             <span class="absolute bottom-0 left-0 w-full h-2 bg-amber-200 opacity-60 z-0"></span>
                         </h2>
                         <p class="text-gray-600 mb-6 text-lg">
-                            Kanaya Kost is perfectly situated at <span class="font-medium">6°16'48.6"S
-                                107°09'56.4"E</span>,
+                            Kanaya Kost is perfectly situated at <span class="font-medium">6째16'48.6"S
+                                107째09'56.4"E</span>,
                             offering unbeatable convenience to key locations in Bekasi:
                         </p>
 
@@ -578,7 +578,7 @@
                         <div class="absolute bottom-4 left-4 bg-white px-3 py-2 rounded-lg shadow-md">
                             <p class="text-xs text-gray-600 font-medium">
                                 <i class="fas fa-map-marker-alt text-amber-500 mr-1"></i>
-                                Kanaya Kost Location: 6°16'48.6"S 107°09'56.4"E
+                                Kanaya Kost Location: 6째16'48.6"S 107째09'56.4"E
                             </p>
                         </div>
                     </div>
@@ -777,16 +777,16 @@
         <div class="chat-container overflow-y-auto p-4 h-[calc(100%-120px)]">
             <div class="space-y-4" x-ref="messagesContainer">
                 <template x-for="msg in messages" :key="msg.id">
-                    <div :class="msg.is_admin ? 'flex justify-start' : 'flex justify-end'">
+                    <div :class="msg.is_admin == 1 ? 'flex justify-start' : 'flex justify-end'">
                         <div class="flex items-end space-x-2"
-                            :class="msg.is_admin ? '' : 'flex-row-reverse space-x-reverse'">
-                            <img :src="msg.is_admin ?
+                            :class="msg.is_admin == 1 ? '' : 'flex-row-reverse space-x-reverse'">
+                            <img :src="msg.is_admin == 1 ?
                                 'https://randomuser.me/api/portraits/men/42.jpg' :
-                                (messages_list.find(c => c.user_id === chatOpen)?.user?.photo ||
+                                (messages.find(c => c.user_id == 4)?.user?.photo ||
                                     'https://randomuser.me/api/portraits/men/1.jpg')"
                                 class="w-8 h-8 rounded-full border border-amber-200 shadow">
                             <div>
-                                <div :class="msg.is_admin ? 'bg-gray-100 text-gray-800' :
+                                <div :class="msg.is_admin == 1 ? 'bg-gray-100 text-gray-800' :
                                     'bg-amber-500 text-white'"
                                     class="px-4 py-2 rounded-2xl shadow max-w-xs break-words">
                                     <span x-text="msg.content"></span>
@@ -968,6 +968,7 @@
                 messages: [],
                 newMessage: '',
                 fetchInterval: null,
+                unreadCount: 0,
 
                 init() {
                     this.loadMessages();
@@ -985,7 +986,8 @@
                 },
 
                 loadMessages() {
-                    fetch('/messages')
+                    console.log({{ Auth()->id() }});
+                    fetch('/user/messages')
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');
@@ -993,7 +995,8 @@
                             return response.json();
                         })
                         .then(data => {
-                            this.messages = data.chat.filter(m => m.user_id === {{ auth()->id() }});
+                            this.messages = data.messages;
+                            this.unreadCount = data.unread_count;
                             this.scrollToBottom();
                         })
                         .catch(error => {
@@ -1027,6 +1030,8 @@
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify({
+                                user_id: {{ auth()->id() }},
+                                is_admin: false,
                                 content: this.newMessage
                             })
                         })
@@ -1055,6 +1060,17 @@
                     return date.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
+                    });
+                },
+                markAsRead() {
+                    fetch('/user/messages/mark-as-read', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content
+                        }
+                    }).then(() => {
+                        this.unreadCount = 0;
                     });
                 }
             }));

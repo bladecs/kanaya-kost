@@ -63,4 +63,8 @@ class User extends Authenticatable
     {
         return $this->sentMessages->merge($this->receivedMessages);
     }
+
+    public function payment(){
+        return $this->belongsTo(PaymentModel::class);
+    }
 }

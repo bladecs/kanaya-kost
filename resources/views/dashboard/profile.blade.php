@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,15 +15,19 @@
             border-left: 4px solid #f6da3b;
             color: #f6d43b;
         }
+
         .profile-nav-item:hover:not(.active) {
             background-color: #f9fafb;
         }
+
         .content-section {
             display: none;
         }
+
         .content-section.active {
             display: block;
         }
+
         .dropdown-menu {
             opacity: 0;
             z-index: 60 !important;
@@ -38,6 +43,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="bg-gradient-to-r from-amber-500 to-amber-400 text-white shadow-lg">
@@ -45,8 +51,10 @@
             <div class="flex items-center justify-between">
                 <!-- Back Button - Left Side -->
                 <div class="flex-1">
-                    <a href="{{ route($previous_url) }}" class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
-                        <div class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full mr-2 group-hover:bg-white/30 transition-colors duration-200">
+                    <a href="{{ route($previous_url) }}"
+                        class="inline-flex items-center group transition-all duration-200 hover:bg-amber-700/30 rounded-lg px-3 py-2">
+                        <div
+                            class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full mr-2 group-hover:bg-white/30 transition-colors duration-200">
                             <i class="fas fa-arrow-left text-white group-hover:text-amber-100"></i>
                         </div>
                         <span class="text-white group-hover:text-amber-100 font-medium">
@@ -69,27 +77,31 @@
                         <!-- Notification Bell -->
                         <button class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
                             <i class="fas fa-bell text-lg text-white"></i>
-                            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1">3</span>
+                            <span
+                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1">3</span>
                         </button>
 
                         <!-- Message Button -->
-                        <button @click="chatOpen = !chatOpen" class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
+                        <button @click="chatOpen = !chatOpen"
+                            class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
                             <i class="fas fa-envelope text-lg text-white"></i>
-                            <span x-show="unreadMessages > 0" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1" x-text="unreadMessages"></span>
+                            <span x-show="unreadMessages > 0"
+                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1"
+                                x-text="unreadMessages"></span>
                         </button>
 
                         <!-- User Profile -->
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
                                 <div class="relative">
-                                    <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg"
-                                        alt="User profile">
+                                    <img class="h-8 w-8 rounded-full"
+                                        src="https://randomuser.me/api/portraits/men/32.jpg" alt="User profile">
                                 </div>
                                 <span class="hidden md:inline-block">John Doe</span>
                                 <i class="fas fa-chevron-down text-xs transition-transform duration-200"
                                     :class="{ 'transform rotate-180': open }"></i>
                             </button>
-        
+
                             <div x-show="open" @click.away="open = false"
                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 dropdown-menu"
                                 :class="{ 'show': open }">
@@ -133,33 +145,38 @@
                     <div class="bg-amber-500 h-20"></div>
                     <div class="px-4 pb-6 relative">
                         <div class="flex justify-center -mt-12 mb-4">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg" 
-                                 class="w-24 h-24 rounded-full border-4 border-white object-cover shadow-md"
-                                 alt="Profile photo">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg"
+                                class="w-24 h-24 rounded-full border-4 border-white object-cover shadow-md"
+                                alt="Profile photo">
                         </div>
                         <div class="text-center mb-6">
-                            <h2 class="text-xl font-bold text-gray-800">John Doe</h2>
-                            <p class="text-gray-600">Member sejak Jan 2023</p>
+                            <h2 class="text-xl font-bold text-gray-800">{{ $user->name }}</h2>
+                            <p class="text-gray-600">Member sejak {{ $user->created_at->translatedFormat('d F Y') }}</p>
                         </div>
-                        
+
                         <nav class="space-y-1">
-                            <a href="#" data-section="profile-info" class="profile-nav-item active flex items-center px-4 py-3 text-gray-700">
+                            <a href="#" data-section="profile-info"
+                                class="profile-nav-item active flex items-center px-4 py-3 text-gray-700">
                                 <i class="fas fa-user-circle mr-3 text-amber-500"></i>
                                 Informasi Profil
                             </a>
-                            <a href="#" data-section="rental-history" class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
+                            <a href="#" data-section="rental-history"
+                                class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
                                 <i class="fas fa-history mr-3 text-gray-500"></i>
                                 Riwayat Penyewaan
                             </a>
-                            <a href="#" data-section="payment-billing" class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
+                            <a href="#" data-section="payment-billing"
+                                class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
                                 <i class="fas fa-credit-card mr-3 text-gray-500"></i>
                                 Pembayaran & Tagihan
                             </a>
-                            <a href="#" data-section="account-security" class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
+                            <a href="#" data-section="account-security"
+                                class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
                                 <i class="fas fa-lock mr-3 text-gray-500"></i>
                                 Keamanan Akun
                             </a>
-                            <a href="#" data-section="settings" class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
+                            <a href="#" data-section="settings"
+                                class="profile-nav-item flex items-center px-4 py-3 text-gray-700">
                                 <i class="fas fa-cog mr-3 text-gray-500"></i>
                                 Pengaturan
                             </a>
@@ -167,7 +184,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Profile Content -->
             <div class="w-full lg:w-3/4">
                 <!-- Informasi Profil -->
@@ -179,56 +196,81 @@
                             Edit Profil
                         </button>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Informasi Pribadi</h3>
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Informasi
+                                Pribadi</h3>
                             <div class="space-y-4">
                                 <div>
                                     <p class="text-sm text-gray-500">Nama Lengkap</p>
-                                    <p class="font-medium">John Doe</p>
+                                    <p class="font-medium">{{ $user->name }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Email</p>
-                                    <p class="font-medium">john.doe@example.com</p>
+                                    <p class="font-medium">{{ $user->email }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Nomor Telepon</p>
-                                    <p class="font-medium">+62 812 3456 7890</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Tanggal Lahir</p>
-                                    <p class="font-medium">15 Januari 1990</p>
+                                    <p class="font-medium">{{ $user->phone }}</p>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Informasi Kost</h3>
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Informasi
+                                Kost</h3>
                             <div class="space-y-4">
                                 <div>
                                     <p class="text-sm text-gray-500">Kamar Saat Ini</p>
-                                    <p class="font-medium">Kamar Deluxe No. 12</p>
+                                    <p class="font-medium">{{ $room->nama }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Tanggal Masuk</p>
-                                    <p class="font-medium">1 Februari 2023</p>
+                                    <p class="font-medium">{{ $room->updated_at->translatedFormat('d F Y') }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Durasi Sewa</p>
-                                    <p class="font-medium">12 Bulan</p>
+                                    @php
+                                        $start = \Carbon\Carbon::parse($room->created_at);
+                                        $end = \Carbon\Carbon::parse($room->updated_at);
+                                        $months = $start->diffInMonths($end);
+                                        $months = $months < 1 ? 1 : $months;
+                                    @endphp
+                                    <p class="font-medium">{{ $months }} bulan</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Status Pembayaran</p>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Terbayar
-                                    </span>
+                                    @if ($payment->status === 'pending')
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Menunggu Pembayaran
+                                        </span>
+                                    @elseif($payment->status === 'verification')
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-hourglass-half mr-1"></i>
+                                            Verifikasi
+                                        </span>
+                                    @elseif($payment->status === 'done' || $payment->status === 'terbayar')
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Terbayar
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-question-circle mr-1"></i>
+                                            Tidak Diketahui
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Dokumen</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -268,39 +310,38 @@
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-2xl font-bold text-gray-800">Riwayat Penyewaan</h1>
                     </div>
-                    
+
                     <div class="space-y-4">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-lg">Kamar Deluxe No. 12</h3>
-                                    <p class="text-gray-600">1 Februari 2023 - 31 Januari 2024</p>
+                        @foreach ($rooms as $item)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold text-lg">{{ $item->nama }}</h3>
+                                        @php
+                                            $startDate = \Carbon\Carbon::parse($item->created_at);
+                                            $endDate = \Carbon\Carbon::parse($item->periode);
+                                        @endphp
+                                        <p class="text-gray-600">{{ $startDate->translatedFormat('d F Y') }} -
+                                            {{ $endDate->translatedFormat('d F Y') }}</p>
+                                    </div>
+                                    @if ($item->nama == $room->nama && $item->tenant == $user->id)
+                                        <span
+                                            class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                            Masih Digunakan
+                                        </span>
+                                    @else
+                                        <span
+                                            class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                                            Selesai
+                                        </span>
+                                    @endif
                                 </div>
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    Selesai
-                                </span>
-                            </div>
-                            <div class="mt-3 flex items-center text-sm text-gray-500">
-                                <i class="fas fa-money-bill-wave mr-2"></i>
-                                Rp 2.500.000/bulan
-                            </div>
-                        </div>
-                        
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-lg">Kamar Standard No. 5</h3>
-                                    <p class="text-gray-600">1 Maret 2022 - 28 Februari 2023</p>
+                                <div class="mt-3 flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-money-bill-wave mr-2"></i>
+                                    Rp {{ $payment->amount }}/bulan
                                 </div>
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                    Selesai
-                                </span>
                             </div>
-                            <div class="mt-3 flex items-center text-sm text-gray-500">
-                                <i class="fas fa-money-bill-wave mr-2"></i>
-                                Rp 1.800.000/bulan
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -309,45 +350,78 @@
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-2xl font-bold text-gray-800">Pembayaran & Tagihan</h1>
                     </div>
-                    
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bulan</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Bayar</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Bulan</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Jumlah</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tanggal Bayar</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Januari 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp 2.500.000</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">25 Desember 2023</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Lunas
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-amber-600 hover:text-amber-900">Unduh Bukti</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Desember 2023</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp 2.500.000</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">25 November 2023</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Lunas
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-amber-600 hover:text-amber-900">Unduh Bukti</a>
-                                    </td>
-                                </tr>
+                                @foreach ($payments as $item)
+                                    <tr>
+                                        @php
+                                            $periode = \Carbon\Carbon::parse($item->periode);
+                                        @endphp
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $periode }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp
+                                            {{ $item->amount }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $item->updated_at->translatedFormat('d F Y') }}</td>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($item->status === 'pending')
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    Menunggu Pembayaran
+                                                </span>
+                                            @elseif($item->status === 'verification')
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <i class="fas fa-hourglass-half mr-1"></i>
+                                                    Verifikasi
+                                                </span>
+                                            @elseif($item->status === 'done' || $payment->status === 'terbayar')
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Terbayar
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                    <i class="fas fa-question-circle mr-1"></i>
+                                                    Tidak Diketahui
+                                                </span>
+                                            @endif
+                                        </td>
+                                        @if ($item->status === 'done' || $item->status === 'terbayar')
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="#" class="text-amber-600 hover:text-amber-900">Unduh
+                                                    Bukti</a>
+                                            </td>
+                                        @else
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"></td>
+                                        @endif
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -358,7 +432,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-2xl font-bold text-gray-800">Keamanan Akun</h1>
                     </div>
-                    
+
                     <div class="space-y-6">
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-center">
@@ -372,7 +446,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -384,7 +458,7 @@
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -404,7 +478,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-2xl font-bold text-gray-800">Pengaturan</h1>
                     </div>
-                    
+
                     <div class="space-y-6">
                         <div class="border border-gray-200 rounded-lg p-4">
                             <h3 class="font-bold text-lg mb-3">Notifikasi</h3>
@@ -413,26 +487,32 @@
                                     <span>Email Notifikasi</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" value="" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600">
+                                        </div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span>SMS Notifikasi</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" value="" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600">
+                                        </div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span>Notifikasi Aplikasi</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" value="" class="sr-only peer" checked>
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600">
+                                        </div>
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="border border-gray-200 rounded-lg p-4">
                             <h3 class="font-bold text-lg mb-3">Tema Aplikasi</h3>
                             <div class="flex space-x-4">
@@ -455,7 +535,8 @@
     <!-- Chat Sidebar (Hidden by default) -->
     <div x-show="chatOpen" class="fixed inset-0 overflow-hidden z-50" style="display: none;">
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="chatOpen = false"></div>
+            <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="chatOpen = false">
+            </div>
             <div class="fixed inset-y-0 right-0 max-w-full flex">
                 <div class="relative w-screen max-w-md">
                     <div class="h-full flex flex-col bg-white shadow-xl">
@@ -477,7 +558,8 @@
                         <!-- Chat input -->
                         <div class="border-t border-gray-200 p-4">
                             <div class="flex items-center">
-                                <input type="text" placeholder="Ketik pesan..." class="flex-1 border border-gray-300 rounded-l-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <input type="text" placeholder="Ketik pesan..."
+                                    class="flex-1 border border-gray-300 rounded-l-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-amber-500">
                                 <button class="bg-amber-600 text-white px-4 py-2 rounded-r-lg hover:bg-amber-700">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
@@ -493,40 +575,42 @@
         <div class="loading-text">Loading Kanaya Kost...</div>
     </div>
     <script>
+        console.log('data user:', @json($user));
+        console.log('data payment:', @json($payment));
         document.addEventListener('DOMContentLoaded', function() {
             // Tangani klik pada menu sidebar
             const navItems = document.querySelectorAll('.profile-nav-item');
             const contentSections = document.querySelectorAll('.content-section');
-            
+
             navItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
+
                     // Hapus kelas active dari semua nav item
                     navItems.forEach(navItem => {
                         navItem.classList.remove('active');
                         navItem.querySelector('i').classList.remove('text-amber-500');
                         navItem.querySelector('i').classList.add('text-gray-500');
                     });
-                    
+
                     // Tambahkan kelas active ke nav item yang diklik
                     this.classList.add('active');
                     this.querySelector('i').classList.remove('text-gray-500');
                     this.querySelector('i').classList.add('text-amber-500');
-                    
+
                     // Dapatkan section yang sesuai
                     const targetSection = this.getAttribute('data-section');
-                    
+
                     // Sembunyikan semua content section
                     contentSections.forEach(section => {
                         section.classList.remove('active');
                     });
-                    
+
                     // Tampilkan section yang dipilih
                     document.getElementById(targetSection).classList.add('active');
                 });
             });
-            
+
             // Inisialisasi Alpine.js untuk chat
             document.addEventListener('alpine:init', () => {
                 Alpine.data('profile', () => ({
@@ -600,4 +684,5 @@
         });
     </script>
 </body>
+
 </html>
