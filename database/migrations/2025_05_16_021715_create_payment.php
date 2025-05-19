@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
+        Schema::create('payment', function (Blueprint $table) {
+            $table->string('id')->primary();
             $table->unsignedBigInteger('user_id');
-            $table->text('content');
-            $table->boolean('is_admin')->default(false);
-            $table->boolean('is_read')->default(false);
+            $table->unsignedBigInteger('room_id');
+            $table->date('periode');
+            $table->string('amount');
+            $table->string('status')->default('pending');
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('payment');
     }
 };

@@ -12,7 +12,8 @@ class RoomModels extends Model
         'nama', 
         'price', 
         'lantai', 
-        'description', 
+        'description',
+        'tenant',
         'available', 
         'rating'
     ];
@@ -23,10 +24,13 @@ class RoomModels extends Model
     public function facilities(): BelongsToMany
     {
         return $this->belongsToMany(
-            FacilityModel::class, // relasi ke model fasilitas
-            'facility_room',      // nama tabel pivot
-            'room_id',            // foreign key untuk RoomModels di tabel pivot
-            'facility_id'         // foreign key untuk FacilityModel di tabel pivot
+            FacilityModel::class,
+            'facility_room',
+            'room_id',
+            'facility_id'
         );
+    }
+    public function payment(){
+        return $this->belongsTo(PaymentModel::class);
     }
 }

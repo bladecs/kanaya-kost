@@ -31,6 +31,18 @@
             color: #e6c018;
         }
 
+        .sidebar-item {
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .sidebar-item .badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
@@ -90,6 +102,10 @@
                     :class="{ 'active': activeTab === 'message' }">
                     <i class="fas fa-envelope mr-3"></i>
                     Message
+                    <span x-show="unreadCount > 0"
+                        class="absolute right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                        x-text="unreadCount">
+                    </span>
                 </a>
                 <a href="#" @click="activeTab = 'payments'; mobileSidebarOpen = false"
                     class="sidebar-item flex items-center px-4 py-3 rounded-lg"
@@ -363,7 +379,7 @@
 
                 <!-- Message Content -->
                 <div x-show="activeTab === 'message'" x-transition>
-                    <div class="flex h-[70vh] bg-white shadow rounded-lg overflow-hidden">
+                    <div class="flex h-[80vh] bg-white shadow rounded-lg overflow-hidden">
                         <!-- Sidebar: List of Chats -->
                         <div class="w-72 border-r bg-amber-50 flex flex-col">
                             <div class="p-4 border-b flex items-center space-x-2">
@@ -377,7 +393,7 @@
                             </div>
                             <div class="flex-1 overflow-y-auto">
                                 <template x-for="chatItem in messages_list" :key="chatItem.user_id">
-                                    <div @click="chatOpen = chatItem.user_id"
+                                    <div @click="chatOpen = chatItem.user_id; markChatAsRead(chatItem.user_id)"
                                         :class="chatOpen === chatItem.user_id ? 'bg-amber-100' : 'hover:bg-amber-200'"
                                         class="flex items-center px-4 py-3 cursor-pointer border-b space-x-3 transition">
                                         <img :src="chatItem.user && chatItem.user.photo ? chatItem.user.photo :
@@ -389,6 +405,9 @@
                                             <div class="text-xs text-gray-500 truncate"
                                                 x-text="chatItem.last_message"></div>
                                         </div>
+                                        <span x-show="chatItem.unread_count > 0"
+                                            class="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                                            x-text="chatItem.unread_count"></span>
                                         <span class="text-xs text-gray-400"
                                             x-text="formatTime(chatItem.updated_at)"></span>
                                     </div>
@@ -415,18 +434,19 @@
                                     </div>
                                     <!-- Messages -->
                                     <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4" x-ref="messagesContainer">
-                                        <template x-for="msg in chat.filter(m => m.user_id === chatOpen)"
+                                        <template x-for="msg in chat.filter(m => m.user_id == chatOpen)"
                                             :key="msg.id">
-                                            <div :class="msg.is_admin ? 'flex justify-end' : 'flex justify-start'">
+                                            <div
+                                                :class="msg.is_admin == 1 ? 'flex justify-end' : 'flex justify-start'">
                                                 <div class="flex items-end space-x-2"
-                                                    :class="msg.is_admin ? 'flex-row-reverse space-x-reverse' : ''">
-                                                    <img :src="msg.is_admin ?
-                                                        'https://randomuser.me/api/portraits/men/42.jpg' :
-                                                        (messages_list.find(c => c.user_id === chatOpen)?.user?.photo ||
-                                                            'https://randomuser.me/api/portraits/women/1.jpg')"
+                                                    :class="msg.is_admin == 1 ? 'flex-row-reverse space-x-reverse' : ''">
+                                                    <img :src="msg.is_admin == 1 ?
+                                                        'https://randomuser.me/api/portraits/men/1.jpg' :
+                                                        (messages_list.find(c => c.user_id == chatOpen)?.user?.photo ||
+                                                            'https://randomuser.me/api/portraits/men/1.jpg')"
                                                         class="w-8 h-8 rounded-full border border-amber-200 shadow">
                                                     <div>
-                                                        <div :class="msg.is_admin ? 'bg-amber-500 text-white' :
+                                                        <div :class="msg.is_admin == 1 ? 'bg-amber-500 text-white' :
                                                             'bg-gray-100 text-gray-800'"
                                                             class="px-4 py-2 rounded-2xl shadow max-w-xs break-words">
                                                             <span x-text="msg.content"></span>
@@ -525,20 +545,20 @@
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-10 w-10">
                                                     <img class="h-10 w-10 rounded-full" :src="payment.tenant.photo"
-                                                        :alt="payment.tenant.name">
+                                                        :alt="payment.user.name">
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-medium text-gray-900"
-                                                        x-text="payment.tenant.name"></div>
-                                                    <div class="text-sm text-gray-500" x-text="payment.tenant.phone">
+                                                        x-text="payment.user.name"></div>
+                                                    <div class="text-sm text-gray-500" x-text="payment.user.phone">
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="payment.room"></td>
+                                            x-text="payment.room.nama"></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="payment.period"></td>
+                                            x-text="payment.periode"></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                                             x-text="'Rp ' + payment.amount.toLocaleString('id-ID')"></td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -1055,11 +1075,11 @@
                                                 <div>
                                                     <label
                                                         class="block text-sm font-medium text-gray-700">Status</label>
-                                                    <select
+                                                    <select x-model="addRoomStatus"
                                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                                         name="room_status">
-                                                        <option :value="false">Kosong</option>
-                                                        <option :value="true">Terisi</option>
+                                                        <option value="empty">Kosong</option>
+                                                        <option value="occupied">Terisi</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1173,10 +1193,28 @@
                                                     <label
                                                         class="block text-sm font-medium text-gray-700">Status</label>
                                                     <select x-model="selectedRoom.available"
+                                                        @change="showUserSelect = ($event.target.value == 1)"
                                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
                                                         name="room_status">
-                                                        <option :value="false">Kosong</option>
-                                                        <option :value="true">Terisi</option>
+                                                        <option :value="0">Kosong</option>
+                                                        <option :value="1">Terisi</option>
+                                                    </select>
+                                                </div>
+
+                                                <div x-show="selectedRoom.available == 1">
+                                                    <label class="block text-sm font-medium text-gray-700">Pilih
+                                                        User</label>
+                                                    <select x-model="selectedRoom.user_id"
+                                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
+                                                        name="tenant">
+                                                        <option value="">Pilih User</option>
+                                                        <template x-for="user in registeredUsers"
+                                                            :key="user.id">
+                                                            <option :value="user.id"
+                                                                :selected="selectedRoom.tenant && user.id == selectedRoom.tenant"
+                                                                x-text="user.name">
+                                                            </option>
+                                                        </template>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1269,6 +1307,7 @@
     </div>
 
     <script>
+        console.log('payment:', @json($payments)); // Debug di console
         function adminApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const activeTab = urlParams.get('activeTab') || 'dashboard';
@@ -1284,14 +1323,16 @@
                 showUpdateRoomModal: false,
                 showDeleteRoomModal: false,
                 selectedPayment: null,
+                showUserSelect: false,
+                registeredUsers: [],
                 stats: {
-                    totalTenants: 24,
-                    totalRooms: 30,
-                    occupiedRooms: 24,
-                    occupancyRate: 80,
-                    paidThisMonth: 18,
-                    totalPayments: 24,
-                    latePayments: 6
+                    totalTenants: @json($customerCount),
+                    totalRooms: @json($roomCount),
+                    occupiedRooms: @json($avaliableRoomCount),
+                    occupancyRate: (@json($avaliableRoomCount) / @json($roomCount)) * 100,
+                    paidThisMonth: @json(collect($payments)->where('status', 'paid')->count()),
+                    totalPayments: @json(count($payments)),
+                    latePayments: @json(collect($payments)->where('status', 'delay')->count())
                 },
                 paymentStats: [{
                         month: 'Jan 2023',
@@ -1387,82 +1428,7 @@
                         revenue: 5800000
                     }
                 ],
-                payments: [{
-                        id: 'INV-2023-06-001',
-                        tenant: {
-                            name: 'Budi Santoso',
-                            phone: '081234567890',
-                            photo: 'https://randomuser.me/api/portraits/men/1.jpg'
-                        },
-                        room: 'A-101',
-                        period: 'Juni 2023',
-                        amount: 1500000,
-                        method: 'Transfer Bank - BCA',
-                        status: 'pending',
-                        date: '2023-06-01',
-                        proof: 'https://via.placeholder.com/400x200?text=Bukti+Transfer'
-                    },
-                    {
-                        id: 'INV-2023-06-002',
-                        tenant: {
-                            name: 'Ani Wijaya',
-                            phone: '081298765432',
-                            photo: 'https://randomuser.me/api/portraits/women/2.jpg'
-                        },
-                        room: 'B-205',
-                        period: 'Juni 2023',
-                        amount: 1800000,
-                        method: 'Transfer Bank - Mandiri',
-                        status: 'paid',
-                        date: '2023-06-02',
-                        proof: 'https://via.placeholder.com/400x200?text=Bukti+Transfer'
-                    },
-                    {
-                        id: 'INV-2023-06-003',
-                        tenant: {
-                            name: 'Cahyo Pratama',
-                            phone: '081223344556',
-                            photo: 'https://randomuser.me/api/portraits/men/3.jpg'
-                        },
-                        room: 'C-304',
-                        period: 'Juni 2023',
-                        amount: 2000000,
-                        method: 'Dana',
-                        status: 'late',
-                        date: '2023-06-10',
-                        proof: 'https://via.placeholder.com/400x200?text=Bukti+Transfer'
-                    },
-                    {
-                        id: 'INV-2023-05-001',
-                        tenant: {
-                            name: 'Dewi Lestari',
-                            phone: '081112223334',
-                            photo: 'https://randomuser.me/api/portraits/women/4.jpg'
-                        },
-                        room: 'A-102',
-                        period: 'Mei 2023',
-                        amount: 1500000,
-                        method: 'Transfer Bank - BNI',
-                        status: 'paid',
-                        date: '2023-05-01',
-                        proof: 'https://via.placeholder.com/400x200?text=Bukti+Transfer'
-                    },
-                    {
-                        id: 'INV-2023-05-002',
-                        tenant: {
-                            name: 'Eko Prasetyo',
-                            phone: '081334455667',
-                            photo: 'https://randomuser.me/api/portraits/men/5.jpg'
-                        },
-                        room: 'B-201',
-                        period: 'Mei 2023',
-                        amount: 1800000,
-                        method: 'Gopay',
-                        status: 'paid',
-                        date: '2023-05-03',
-                        proof: 'https://via.placeholder.com/400x200?text=Bukti+Transfer'
-                    }
-                ],
+                payments: @json($payments),
                 tenants: @json($customer),
                 messages_list: [],
                 chat: [],
@@ -1548,10 +1514,15 @@
                     }
                 },
                 init() {
+                    this.unreadCount = 0;
                     this.loadMessages();
                     this.startFetching();
+                    this.$watch('showUpdateRoomModal', (value) => {
+                        if (value) {
+                            this.userFetching();
+                        }
+                    });
                 },
-
                 startFetching() {
                     if (this.fetchInterval) clearInterval(this.fetchInterval);
                     this.fetchInterval = setInterval(() => {
@@ -1560,7 +1531,6 @@
                         }
                     }, 1000);
                 },
-
                 loadMessages() {
                     fetch('/messages')
                         .then(response => {
@@ -1573,6 +1543,10 @@
                             this.messages_list = data.messages;
                             this.chat = data.chat;
                             this.scrollToBottom();
+                            this.unreadCount = data.messages.reduce(
+                                (total, chat) => total + (chat.unread_count || 0),
+                                0
+                            );
                         })
                         .catch(error => {
                             console.error('Error loading messages:', error);
@@ -1583,7 +1557,6 @@
                             }];
                         });
                 },
-
                 scrollToBottom() {
                     this.$nextTick(() => {
                         const container = this.$refs.messagesContainer;
@@ -1592,9 +1565,19 @@
                         }
                     });
                 },
-
                 sendMessage() {
                     if (!this.newMessage || !this.chatOpen) return;
+                    const tempMsg = {
+                        id: Date.now(), // ID sementara
+                        user_id: this.chatOpen,
+                        content: this.newMessage,
+                        is_admin: "1",
+                        created_at: new Date().toISOString()
+                    };
+
+                    // Tambahkan ke chat (tampilkan di UI segera)
+                    this.chat.push(tempMsg);
+                    this.scrollToBottom();
                     fetch('/messages', {
                             method: 'POST',
                             headers: {
@@ -1618,9 +1601,7 @@
                             return response.json();
                         })
                         .then(data => {
-                            this.chat.push(data);
                             this.newMessage = '';
-                            this.scrollToBottom();
                         })
                         .catch(error => {
                             console.error('Error:', error);
@@ -1628,12 +1609,37 @@
                                 'Terjadi kesalahan'));
                         });
                 },
-
                 formatTime(timestamp) {
                     const date = new Date(timestamp);
                     return date.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
+                    });
+                },
+                userFetching() {
+                    fetch('/users')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.registeredUsers = data.data;
+                        })
+                        .catch(error => {
+                            console.error('Error loading users:', error);
+                        });
+                },
+                markChatAsRead(userId) {
+                    fetch(`/messages/${userId}/mark-as-read`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    }).then(() => {
+                        const chat = this.messages_list.find(c => c.user_id === userId);
+                        if (chat) chat.unread_count = 0;
                     });
                 }
             }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoomModels;
 use App\Models\FacilityModel;
+use App\Models\PaymentModel;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,15 +13,19 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-    // Menampilkan semua kamar
     public function index()
     {
         $rooms = RoomModels::with('facilities')->get();
         $customer = User::where('role', 'customer')->get();
-        return view('admin.dashboard', compact('rooms', 'customer'));
+        $customerCount = $customer->count();
+        $roomCount = $rooms->count();
+        $payments = PaymentModel::with(['user', 'room'])->get();
+        $avaliableRoomCount = $rooms->where('available', true)->count();
+        return view('admin.dashboard', compact('rooms', 'customer','payments', 'customerCount', 'roomCount', 'avaliableRoomCount'));
     }
 
-    // Menyimpan kamar baru (dari modal)
+    // Room Function
+    // Penyimpanan Room
     public function store(Request $request)
     {
         try {
@@ -78,25 +83,51 @@ class AdminController extends Controller
         Log::info($request->all());
         try {
             $room = RoomModels::findOrFail($request->room_id);
-
+            // $tenant = User::all(); // Tidak perlu mengambil semua user
             $validated = $request->validate([
                 'room_name' => 'required|string|max:255',
                 'room_price' => 'required|numeric',
                 'room_status' => 'required|string',
+                'tenant' => 'nullable|exists:users,id',
                 'facilities' => 'nullable|array',
                 'facilities.*' => 'exists:facilities,id',
                 'description' => 'nullable|string'
             ]);
 
             // Konversi string 'false' ke boolean
-            $roomStatus = $request->room_status === 'true' ? true : false;
 
             $room->update([
                 'nama' => $validated['room_name'],
                 'price' => $validated['room_price'],
-                'available' => $roomStatus,
+                'tenant' => $validated['tenant'],
+                'available' => $validated['room_status'],
                 'description' => $validated['description']
             ]);
+
+            if ($validated['room_status'] == 1) {
+                User::where('id', $validated['tenant'])->update([
+                    'status' => true
+                ]);
+                $room->update([
+                    'tenant' => $validated['tenant']
+                ]);
+                PaymentModel::create([
+                    'id' => 'INV-' . $validated['tenant'] . '-' . date('mY'),
+                    'user_id' => $validated['tenant'],
+                    'room_id' => $room->id,
+                    'amount' => $validated['room_price'],
+                    'periode' => now()->addMonth(),
+                    'status' => 'pending',
+                    'payment_proof' => null,
+                ]);
+            } else {
+                User::where('id', $validated['tenant'])->update([
+                    'status' => false
+                ]);
+                $room->update([
+                    'tenant' => null
+                ]);
+            }
 
             // Sync langsung IDs fasilitas
             $room->facilities()->sync($validated['facilities'] ?? []);
@@ -134,5 +165,50 @@ class AdminController extends Controller
                     'message' => 'Gagal update: ' . $e->getMessage()
                 ])->with('activeTab', 'rooms');
         }
+    }
+
+    // Payment Function
+    public function payment(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'payment_status' => 'required|string',
+                'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            // Simpan bukti pembayaran
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                Storage::putFileAs('public/payment_proofs', $file, $filename);
+            }
+
+            // Update status pembayaran
+            PaymentModel::where('id', $request->message_id)->update([
+                'status' => $validated['payment_status'],
+                'payment_proof' => isset($filename) ? 'storage/payment_proofs/' . $filename : null,
+            ]);
+
+            return redirect()->route('admin.dashboard')
+                ->with('notification', [
+                    'type' => 'success',
+                    'message' => 'Pembayaran berhasil diproses!'
+                ])->with('activeTab', 'payments');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.dashboard')
+                ->with('notification', [
+                    'type' => 'error',
+                    'message' => 'Gagal update: ' . $e->getMessage()
+                ])->with('activeTab', 'payments');
+        }
+    }
+
+    public function user()
+    {
+        $users = User::where('role', 'customer')->select('id', 'name')->get();
+        return response()->json([
+            'data' => $users,
+            'message' => 'Data user berhasil diambil'
+        ])->setStatusCode(200);
     }
 }
