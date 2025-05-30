@@ -16,12 +16,11 @@ class AdminController extends Controller
     public function index()
     {
         $rooms = RoomModels::with('facilities')->get();
-        $customer = User::where('role', 'customer')->get();
+        $customer = User::with('rooms')->where('role', 'customer')->get();
         $customerCount = $customer->count();
         $roomCount = $rooms->count();
-        $payments = PaymentModel::with(['user', 'room'])->get();
         $avaliableRoomCount = $rooms->where('available', true)->count();
-        return view('admin.dashboard', compact('rooms', 'customer','payments', 'customerCount', 'roomCount', 'avaliableRoomCount'));
+        return view('admin.dashboard', compact('rooms', 'customer', 'customerCount', 'roomCount', 'avaliableRoomCount'));
     }
 
     // Room Function
@@ -168,39 +167,59 @@ class AdminController extends Controller
     }
 
     // Payment Function
-    public function payment(Request $request)
+    public function payment()
+    {
+        $payments = PaymentModel::with(['user', 'room'])->get();
+
+        return response()->json([
+            'success' => true,
+            'payments' => $payments,
+        ]);
+    }
+
+    public function verify_payment($payment_id)
     {
         try {
-            $validated = $request->validate([
-                'payment_status' => 'required|string',
-                'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            $payment = PaymentModel::findOrFail($payment_id);
+            $payment->status = 'paid';
+            $payment->verified_at = now();
+            $payment->verified_by = auth()->id();
+            $payment->save();
+
+            User::where('id', $payment->user_id)->update(['status' => 'active']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran berhasil diverifikasi!',
+                'payment' => $payment
             ]);
-
-            // Simpan bukti pembayaran
-            if ($request->hasFile('payment_proof')) {
-                $file = $request->file('payment_proof');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                Storage::putFileAs('public/payment_proofs', $file, $filename);
-            }
-
-            // Update status pembayaran
-            PaymentModel::where('id', $request->message_id)->update([
-                'status' => $validated['payment_status'],
-                'payment_proof' => isset($filename) ? 'storage/payment_proofs/' . $filename : null,
-            ]);
-
-            return redirect()->route('admin.dashboard')
-                ->with('notification', [
-                    'type' => 'success',
-                    'message' => 'Pembayaran berhasil diproses!'
-                ])->with('activeTab', 'payments');
         } catch (\Exception $e) {
-            return redirect()->route('admin.dashboard')
-                ->with('notification', [
-                    'type' => 'error',
-                    'message' => 'Gagal update: ' . $e->getMessage()
-                ])->with('activeTab', 'payments');
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memverifikasi pembayaran: ' . $e->getMessage()
+            ]);
         }
+    }
+
+    public function checkLatePayments()
+    {
+        $latePayments = PaymentModel::with(['user', 'room'])
+            ->whereIn('status', ['pending', 'late'])
+            ->where('periode', '<', now()->startOfMonth())
+            ->get();
+
+        foreach ($latePayments as $payment) {
+            $payment->update(['status' => 'late']);
+
+            // Optional: Nonaktifkan user jika pembayaran terlambat
+            User::where('id', $payment->user_id)->update(['status' => 'non-active']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Late payments checked',
+            'count' => $latePayments->count()
+        ]);
     }
 
     public function user()

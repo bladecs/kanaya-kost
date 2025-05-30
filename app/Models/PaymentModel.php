@@ -12,7 +12,18 @@ class PaymentModel extends Model
     protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $fillable = ['id', 'user_id', 'room_id', 'periode', 'amount', 'status'];
+    protected $fillable = [
+        'id',
+        'user_id',
+        'room_id',
+        'periode',
+        'amount',
+        'status',
+        'payment_proof',
+        'status',
+        'notes',
+        'verified_at'
+    ];
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

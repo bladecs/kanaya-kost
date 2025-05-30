@@ -125,12 +125,6 @@
                     <i class="fas fa-door-open mr-3"></i>
                     Manajemen Kamar
                 </a>
-                <a href="#" @click="activeTab = 'reports'; mobileSidebarOpen = false"
-                    class="sidebar-item flex items-center px-4 py-3 rounded-lg"
-                    :class="{ 'active': activeTab === 'reports' }">
-                    <i class="fas fa-chart-bar mr-3"></i>
-                    Laporan
-                </a>
             </nav>
 
             <!-- Logout Button -->
@@ -154,7 +148,7 @@
                         </button>
                         <h2 class="text-xl font-semibold text-gray-800"
                             x-text="
-                            activeTab === 'dashboard' ? 'Dashboard' : 
+                            activeTab === 'dashboard' ? 'Dashboard' :
                             activeTab === 'message' ? 'Message' :
                             activeTab === 'payments' ? 'Verifikasi Pembayaran' :
                             activeTab === 'tenants' ? 'Data Penghuni' :
@@ -163,13 +157,6 @@
                         </h2>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="p-2 rounded-full hover:bg-gray-100">
-                                <i class="fas fa-bell text-gray-600"></i>
-                                <span
-                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                            </button>
-                        </div>
                         <div class="relative">
                             <button @click="profileDropdownOpen = !profileDropdownOpen"
                                 class="flex items-center space-x-2">
@@ -305,7 +292,7 @@
                                                     <span
                                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full payment-status"
                                                         :class="payment.status"
-                                                        x-text="payment.status === 'pending' ? 'Menunggu' : payment.status === 'paid' ? 'Lunas' : 'Terlambat'"></span>
+                                                        x-text="payment.status === 'pending_verification' ? 'Menunggu' : payment.status === 'paid' ? 'Lunas' : 'Terlambat'"></span>
                                                 </td>
                                             </tr>
                                         </template>
@@ -341,38 +328,11 @@
                         </div>
                     </div>
 
-                    <!-- Payment Chart -->
+                    <!-- Revenue Chart -->
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Statistik Pembayaran 6 Bulan Terakhir</h3>
+                        <h3 class="text-lg font-semibold mb-4">Total Pendapatan 6 Bulan Terakhir</h3>
                         <div class="h-64">
-                            <!-- Chart placeholder - you would integrate a real chart library here -->
-                            <div class="flex items-end h-48 border-b border-l border-gray-200">
-                                <template x-for="month in paymentStats">
-                                    <div class="flex-1 flex flex-col items-center px-2">
-                                        <div class="w-8 bg-amber-500 rounded-t"
-                                            :style="`height: ${month.paid/200000}%`" title="Lunas"></div>
-                                        <div class="w-8 bg-yellow-500" :style="`height: ${month.pending/200000}%`"
-                                            title="Menunggu"></div>
-                                        <div class="w-8 bg-red-500 rounded-b" :style="`height: ${month.late/200000}%`"
-                                            title="Terlambat"></div>
-                                        <p class="text-xs mt-2" x-text="month.month"></p>
-                                    </div>
-                                </template>
-                            </div>
-                            <div class="flex justify-center mt-4 space-x-4">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-amber-500 rounded mr-1"></div>
-                                    <span class="text-xs">Lunas</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-yellow-500 rounded mr-1"></div>
-                                    <span class="text-xs">Menunggu</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-red-500 rounded mr-1"></div>
-                                    <span class="text-xs">Terlambat</span>
-                                </div>
-                            </div>
+                            <canvas id="revenueChart" x-ref="revenueChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -481,21 +441,21 @@
                     </div>
                 </div>
 
-                <!-- Payment Verification Content -->
+
+                <!-- Payment Content -->
                 <div x-show="activeTab === 'payments'" x-transition>
-                    <!-- Existing payment verification content -->
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">Daftar Pembayaran</h3>
                         <div class="flex space-x-2">
                             <div class="relative">
-                                <input type="text" placeholder="Cari penghuni..."
+                                <input type="text" placeholder="Cari penghuni..." x-model="paymentSearch"
                                     class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                             </div>
                             <select x-model="paymentFilter"
                                 class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500">
                                 <option value="all">Semua Status</option>
-                                <option value="pending">Menunggu Verifikasi</option>
+                                <option value="pending_verfication">Menunggu Verifikasi</option>
                                 <option value="paid">Terverifikasi</option>
                                 <option value="late">Terlambat</option>
                             </select>
@@ -503,101 +463,115 @@
                     </div>
 
                     <div class="bg-white shadow rounded-lg overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        ID Pembayaran
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Penghuni
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Kamar
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Periode
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Jumlah
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <template x-for="payment in filteredPayments" :key="payment.id">
+                        <template x-if="filteredPayments.length === 0">
+                            <div class="p-8 text-center text-gray-500">
+                                Tidak ada data pembayaran yang ditemukan
+                            </div>
+                        </template>
+
+                        <template x-if="filteredPayments.length > 0">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                                            x-text="payment.id"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded-full" :src="payment.tenant.photo"
-                                                        :alt="payment.user.name">
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900"
-                                                        x-text="payment.user.name"></div>
-                                                    <div class="text-sm text-gray-500" x-text="payment.user.phone">
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            ID Pembayaran
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Penghuni
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Kamar
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Periode
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Jumlah
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Aksi
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="payment in filteredPayments" :key="payment.id">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                                                x-text="payment.id"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                        <img class="h-10 w-10 rounded-full"
+                                                            :src="payment.tenant.photo || '/images/default-avatar.png'"
+                                                            :alt="payment.user.name">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900"
+                                                            x-text="payment.user.name"></div>
+                                                        <div class="text-sm text-gray-500"
+                                                            x-text="payment.user.phone"></div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="payment.room.nama"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="payment.periode"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="'Rp ' + payment.amount.toLocaleString('id-ID')"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full payment-status"
-                                                :class="payment.status">
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                x-text="payment.room.nama"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                x-text="payment.periode"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                x-text="'Rp ' + payment.amount.toLocaleString('id-ID')"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <span
-                                                    x-text="payment.status === 'pending' ? 'Menunggu' : 
-                                                       payment.status === 'paid' ? 'Lunas' : 'Terlambat'"></span>
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <template x-if="payment.status === 'pending'">
-                                                <div class="flex space-x-2">
-                                                    <button @click="verifyPayment(payment.id)"
-                                                        class="text-green-600 hover:text-green-900">
-                                                        <i class="fas fa-check-circle mr-1"></i> Verifikasi
-                                                    </button>
-                                                    <button @click="rejectPayment(payment.id)"
-                                                        class="text-red-600 hover:text-red-900">
-                                                        <i class="fas fa-times-circle mr-1"></i> Tolak
-                                                    </button>
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize"
+                                                    :class="{
+                                                        'bg-yellow-100 text-yellow-800': payment
+                                                            .status === 'pending_verification',
+                                                        'bg-green-100 text-green-800': payment.status === 'paid',
+                                                        'bg-red-100 text-red-800': payment.status === 'late'
+                                                    }">
+                                                    <span
+                                                        x-text="payment.status === 'pending_verification' ? 'Menunggu' :
+                                                           payment.status === 'paid' ? 'Lunas' : 'Terlambat'"></span>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <template x-if="payment.status === 'pending_verification'">
+                                                    <div class="flex space-x-2">
+                                                        <button @click="verifyPayment(payment.id)"
+                                                            class="text-green-600 hover:text-green-900">
+                                                            <i class="fas fa-check-circle mr-1"></i> Verifikasi
+                                                        </button>
+                                                        <button @click="rejectPayment(payment.id)"
+                                                            class="text-red-600 hover:text-red-900">
+                                                            <i class="fas fa-times-circle mr-1"></i> Tolak
+                                                        </button>
+                                                        <button @click="viewPayment(payment.id)"
+                                                            class="text-amber-500 hover:text-amber-900">
+                                                            <i class="fas fa-eye mr-1"></i> Lihat
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                                <template x-if="payment.status !== 'pending_verification'">
                                                     <button @click="viewPayment(payment.id)"
                                                         class="text-amber-500 hover:text-amber-900">
-                                                        <i class="fas fa-eye mr-1"></i> Lihat
+                                                        <i class="fas fa-eye mr-1"></i> Detail
                                                     </button>
-                                                </div>
-                                            </template>
-                                            <template x-if="payment.status !== 'pending'">
-                                                <button @click="viewPayment(payment.id)"
-                                                    class="text-amber-500 hover:text-amber-900">
-                                                    <i class="fas fa-eye mr-1"></i> Detail
-                                                </button>
-                                            </template>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
                     </div>
 
                     <!-- Pagination -->
@@ -607,11 +581,17 @@
                                 x-text="payments.length"></span> pembayaran
                         </div>
                         <div class="flex space-x-2">
-                            <button
+                            <button @click="currentPage > 1 ? currentPage-- : null" :disabled="currentPage === 1"
+                                :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
                                 class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                 Sebelumnya
                             </button>
-                            <button
+                            <span class="px-3 py-1 text-sm text-gray-700">
+                                Halaman <span x-text="currentPage"></span>
+                            </span>
+                            <button @click="currentPage < totalPages ? currentPage++ : null"
+                                :disabled="currentPage === totalPages"
+                                :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }"
                                 class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                 Selanjutnya
                             </button>
@@ -671,10 +651,6 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded-full" :src="tenant.photo"
-                                                        :alt="tenant.name">
-                                                </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-medium text-gray-900"
                                                         x-text="tenant.name"></div>
@@ -682,8 +658,11 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            x-text="tenant.room"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <template x-for="(room, index) in tenant.rooms" :key="index">
+                                                <div x-text="room.nama"></div>
+                                            </template>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <div x-text="tenant.phone"></div>
                                             <div x-text="tenant.email"></div>
@@ -692,9 +671,9 @@
                                             x-text="new Date(tenant.created_at).toISOString().split('T')[0]"></td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                :class="tenant.status === 1 ? 'bg-green-100 text-green-800' :
+                                                :class="tenant.status === 'active' ? 'bg-green-100 text-green-800' :
                                                     'bg-red-100 text-red-800'"
-                                                x-text="tenant.status === 1 ? 'Aktif' : 'Nonaktif'"></span>
+                                                x-text="tenant.status === 'active' ? 'Aktif' : 'Nonaktif'"></span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex space-x-2">
@@ -800,133 +779,44 @@
                     </div>
                 </div>
 
-                <!-- Reports Content -->
-                <div x-show="activeTab === 'reports'" x-transition>
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Laporan</h3>
-                        <div class="flex space-x-2">
-                            <select
-                                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                <option>Pilih Laporan</option>
-                                <option>Laporan Pembayaran</option>
-                                <option>Laporan Penghuni</option>
-                                <option>Laporan Keuangan</option>
-                            </select>
-                            <select
-                                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                <option>Bulan Ini</option>
-                                <option>3 Bulan Terakhir</option>
-                                <option>6 Bulan Terakhir</option>
-                                <option>Tahun Ini</option>
-                            </select>
-                            <button
-                                class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                <i class="fas fa-download mr-2"></i>Unduh
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="bg-white shadow rounded-lg p-6 mb-6">
-                        <h4 class="text-lg font-semibold mb-4">Ringkasan Keuangan</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div class="border rounded-lg p-4">
-                                <h5 class="text-gray-500 mb-2">Pendapatan Bulan Ini</h5>
-                                <p class="text-2xl font-bold text-green-600"
-                                    x-text="'Rp ' + financialSummary.currentMonth.toLocaleString('id-ID')"></p>
-                                <p class="text-sm text-gray-500 mt-1"
-                                    x-text="'± ' + financialSummary.percentageChange + '% dari bulan lalu'"></p>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <h5 class="text-gray-500 mb-2">Pendapatan Tahun Ini</h5>
-                                <p class="text-2xl font-bold text-amber-500"
-                                    x-text="'Rp ' + financialSummary.yearToDate.toLocaleString('id-ID')"></p>
-                                <p class="text-sm text-gray-500 mt-1"
-                                    x-text="'± ' + financialSummary.yearPercentageChange + '% dari tahun lalu'"></p>
-                            </div>
-                            <div class="border rounded-lg p-4">
-                                <h5 class="text-gray-500 mb-2">Pembayaran Tertunda</h5>
-                                <p class="text-2xl font-bold text-red-600" x-text="financialSummary.pendingPayments">
-                                </p>
-                                <p class="text-sm text-gray-500 mt-1">Total Rp <span
-                                        x-text="financialSummary.pendingAmount.toLocaleString('id-ID')"></span></p>
-                            </div>
-                        </div>
-
-                        <div class="border rounded-lg p-4">
-                            <h5 class="text-gray-500 mb-4">Grafik Pendapatan Tahunan</h5>
-                            <div class="h-64">
-                                <!-- Chart placeholder -->
-                                <div class="flex items-end h-48 border-b border-l border-gray-200">
-                                    <template x-for="month in annualRevenue">
-                                        <div class="flex-1 flex flex-col items-center px-1">
-                                            <div class="w-6 bg-amber-500 rounded-t"
-                                                :style="`height: ${month.revenue/500000}%`"
-                                                :title="'Rp ' + month.revenue.toLocaleString('id-ID')"></div>
-                                            <p class="text-xs mt-1" x-text="month.month.substring(0,3)"></p>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h4 class="text-lg font-semibold mb-4">Pembayaran Terakhir</h4>
-                            <div class="space-y-4">
-                                <template x-for="payment in recentPayments.slice(0,5)" :key="payment.id">
-                                    <div class="flex items-start">
-                                        <div class="p-2 rounded-full bg-amber-100 text-amber-500 mr-3">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex justify-between">
-                                                <h5 class="font-medium" x-text="payment.tenant.name"></h5>
-                                                <span class="text-sm font-medium"
-                                                    x-text="'Rp ' + payment.amount.toLocaleString('id-ID')"></span>
-                                            </div>
-                                            <p class="text-sm text-gray-500" x-text="payment.period"></p>
-                                            <p class="text-xs mt-1">
-                                                <span class="px-2 inline-flex leading-5 font-semibold rounded-full"
-                                                    :class="payment.status === 'paid' ? 'bg-green-100 text-green-800' :
-                                                        payment.status === 'pending' ?
-                                                        'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'"
-                                                    x-text="payment.status === 'paid' ? 'Lunas' : 
-                                                             payment.status === 'pending' ? 'Menunggu' : 'Terlambat'"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="bg-white shadow rounded-lg p-6">
-                            <h4 class="text-lg font-semibold mb-4">Kamar Kosong</h4>
-                            <div class="space-y-3">
-                                <template x-for="room in emptyRooms" :key="room.number">
-                                    <div class="flex justify-between items-center p-3 border rounded-lg">
-                                        <div>
-                                            <h5 class="font-medium" x-text="'Kamar ' + room.number"></h5>
-                                            <p class="text-sm text-gray-500" x-text="room.type"></p>
-                                        </div>
-                                        <div>
-                                            <span class="font-medium"
-                                                x-text="'Rp ' + room.price.toLocaleString('id-ID')"></span>
-                                            <button class="ml-2 text-amber-500 hover:text-amber-500 text-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Payment Detail Modal -->
                 <div x-show="showPaymentDetail" x-transition class="fixed inset-0 overflow-y-auto z-50"
                     style="display: none;">
-                    <!-- Existing payment detail modal -->
+                    <div
+                        class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                            <div class="absolute inset-0 bg-gray-500 opacity-75" @click="showPaymentDetail = false">
+                            </div>
+                        </div>
+                        <div
+                            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div class="sm:flex sm:items-start">
+                                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                                            Detail Pembayaran
+                                        </h3>
+                                        <div class="flex justify-center">
+                                            <template x-if="selectedPayment.payment_proof.endsWith('.pdf')">
+                                                <embed :src="'/storage/public/' + selectedPayment.payment_proof"
+                                                    type="application/pdf" class="w-full h-96 rounded-lg shadow-md">
+                                            </template>
+                                            <template x-if="!selectedPayment.payment_proof.endsWith('.pdf')">
+                                                <img :src="'/storage/public/' + selectedPayment.payment_proof"
+                                                    alt="Payment Image" class="max-w-full rounded-lg shadow-md">
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="button" @click="showPaymentDetail = false"
+                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Add Tenant Modal -->
@@ -1305,9 +1195,9 @@
             </main>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        console.log('payment:', @json($payments)); // Debug di console
+        // Debug di console
         function adminApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const activeTab = urlParams.get('activeTab') || 'dashboard';
@@ -1322,17 +1212,22 @@
                 showAddRoomModal: false,
                 showUpdateRoomModal: false,
                 showDeleteRoomModal: false,
-                selectedPayment: null,
                 showUserSelect: false,
                 registeredUsers: [],
+                selectedPayment: null,
+                showPaymentDetail: false,
+                paymentFilter: 'all',
+                paymentSearch: '',
+                currentPage: 1,
+                itemsPerPage: 10,
                 stats: {
-                    totalTenants: @json($customerCount),
-                    totalRooms: @json($roomCount),
-                    occupiedRooms: @json($avaliableRoomCount),
-                    occupancyRate: (@json($avaliableRoomCount) / @json($roomCount)) * 100,
-                    paidThisMonth: @json(collect($payments)->where('status', 'paid')->count()),
-                    totalPayments: @json(count($payments)),
-                    latePayments: @json(collect($payments)->where('status', 'delay')->count())
+                    totalTenants: 0,
+                    totalRooms: 0,
+                    occupiedRooms: 0,
+                    occupancyRate: 0,
+                    paidThisMonth: 0,
+                    totalPayments: 0,
+                    latePayments: 0
                 },
                 paymentStats: [{
                         month: 'Jan 2023',
@@ -1428,7 +1323,7 @@
                         revenue: 5800000
                     }
                 ],
-                payments: @json($payments),
+                payments: [],
                 tenants: @json($customer),
                 messages_list: [],
                 chat: [],
@@ -1463,10 +1358,6 @@
                         name: "Meja"
                     },
                 ],
-                get filteredPayments() {
-                    if (this.paymentFilter === 'all') return this.payments;
-                    return this.payments.filter(p => p.status === this.paymentFilter);
-                },
                 get recentPayments() {
                     return [...this.payments].sort((a, b) => new Date(b.date) - new Date(a.date));
                 },
@@ -1477,29 +1368,103 @@
                     this.selectedPayment = this.payments.find(p => p.id === id);
                     this.showPaymentDetail = true;
                 },
-                verifyPayment(id) {
-                    const payment = this.payments.find(p => p.id === id);
-                    payment.status = 'paid';
-                    this.showPaymentDetail = false;
-                    alert(`Pembayaran ${id} telah diverifikasi!`);
+                async verifyPayment(id) {
+                    try {
+                        const response = await fetch(`/payments/verify/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to verify payment');
+                        }
+
+                        const data = await response.json();
+                        const paymentIndex = this.payments.findIndex(p => p.id === id);
+
+                        if (paymentIndex !== -1) {
+                            this.payments[paymentIndex].status = 'paid';
+                            this.showPaymentDetail = false;
+
+                            // Show success notification
+                            this.showNotification('success', `Payment ${id} has been verified!`);
+                        }
+                    } catch (error) {
+                        console.error('Error verifying payment:', error);
+                        this.showNotification('error', 'Failed to verify payment.');
+                    }
                 },
-                rejectPayment(id) {
-                    const payment = this.payments.find(p => p.id === id);
-                    payment.status = 'late';
-                    this.showPaymentDetail = false;
-                    alert(`Pembayaran ${id} telah ditolak!`);
+                async rejectPayment(id) {
+                    try {
+                        const response = await fetch(`/payments/${id}/reject`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to reject payment');
+                        }
+
+                        const data = await response.json();
+                        const paymentIndex = this.payments.findIndex(p => p.id === id);
+
+                        if (paymentIndex !== -1) {
+                            this.payments[paymentIndex].status = 'late';
+                            this.showPaymentDetail = false;
+
+                            // Show success notification
+                            this.showNotification('success', `Payment ${id} has been rejected!`);
+                        }
+                    } catch (error) {
+                        console.error('Error rejecting payment:', error);
+                        this.showNotification('error', 'Failed to reject payment.');
+                    }
+                },
+                showNotification(type, message) {
+                    // Implement a proper notification system
+                    const notification = document.createElement('div');
+                    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+                    notification.textContent = message;
+                    document.body.appendChild(notification);
+
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 3000);
+                },
+                // Add this computed property to your Alpine.js component
+                get filteredPayments() {
+                    if (this.paymentFilter === 'all') {
+                        return this.payments;
+                    }
+
+                    return this.payments.filter(payment => {
+                        if (this.paymentFilter === 'pending') {
+                            return payment.status === 'pending_verification';
+                        } else if (this.paymentFilter === 'paid') {
+                            return payment.status === 'paid';
+                        } else if (this.paymentFilter === 'late') {
+                            return payment.status === 'late';
+                        }
+                        return true;
+                    });
                 },
                 viewTenant(id) {
-                    // Implement view tenant detail
                     alert(`View tenant ${id}`);
                 },
                 editTenant(id) {
-                    // Implement edit tenant
                     alert(`Edit tenant ${id}`);
                 },
                 confirmDeleteTenant(id) {
                     if (confirm(`Apakah Anda yakin ingin menghapus penghuni ini?`)) {
-                        // Implement delete tenant
+
                         alert(`Tenant ${id} deleted`);
                     }
                 },
@@ -1514,7 +1479,9 @@
                     }
                 },
                 init() {
+                    console.log(this.tenants);
                     this.unreadCount = 0;
+                    this.fetchPayments();
                     this.loadMessages();
                     this.startFetching();
                     this.$watch('showUpdateRoomModal', (value) => {
@@ -1522,6 +1489,165 @@
                             this.userFetching();
                         }
                     });
+                    this.$watch('payments', () => {
+                        this.initRevenueChart();
+                    });
+
+                    this.$nextTick(() => {
+                        this.initRevenueChart();
+                    });
+                },
+                initRevenueChart() {
+                    const ctx = this.$refs.revenueChart;
+
+                    // Pastikan elemen canvas ada
+                    if (!ctx) return;
+
+                    // Hancurkan chart sebelumnya jika ada
+                    if (this.revenueChartInstance) {
+                        this.revenueChartInstance.destroy();
+                    }
+
+                    // Dapatkan data revenue per bulan
+                    const monthlyRevenue = this.getMonthlyRevenue();
+
+                    // Buat chart baru
+                    this.revenueChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: this.payments
+                                .filter(payment => payment.status === 'paid' && payment.verified_at)
+                                .map(payment => {
+                                    const date = new Date(payment.verified_at);
+                                    return `${date.toLocaleString('id-ID', { month: 'long' })} ${date.getFullYear()}`;
+                                }),
+                            datasets: [{
+                                label: 'Pendapatan (Rp)',
+                                data: monthlyRevenue.map(item => item.total),
+                                backgroundColor: '#10B981', // Warna hijau
+                                borderColor: '#059669',
+                                borderWidth: 1,
+                                borderRadius: 4 // Sudut rounded
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'Rp ' + value.toLocaleString('id-ID');
+                                        }
+                                    },
+                                    grid: {
+                                        color: '#E5E7EB'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Rp ' + context.raw.toLocaleString('id-ID');
+                                        }
+                                    },
+                                    displayColors: false
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                },
+                getMonthlyRevenue() {
+                    // Filter hanya pembayaran yang statusnya 'paid'
+                    const paidPayments = this.payments.filter(p => p.status === 'paid');
+
+                    // Buat objek untuk menyimpan total per bulan
+                    const monthlyTotals = {};
+
+                    // Proses setiap pembayaran
+                    paidPayments.forEach(payment => {
+                        // Ambil bulan dan tahun dari tanggal pembayaran
+                        const date = new Date(payment.date);
+                        const monthYear =
+                            `${date.toLocaleString('id-ID', { month: 'long' })} ${date.getFullYear()}`;
+
+                        // Tambahkan amount ke total bulan tersebut
+                        if (!monthlyTotals[monthYear]) {
+                            monthlyTotals[monthYear] = 0;
+                        }
+                        monthlyTotals[monthYear] += payment.amount;
+                    });
+
+                    // Konversi ke format yang dibutuhkan chart
+                    const result = Object.keys(monthlyTotals).map(month => ({
+                        month: month,
+                        total: monthlyTotals[month]
+                    }));
+
+                    // Urutkan berdasarkan tanggal (terlama ke terbaru)
+                    result.sort((a, b) => {
+                        const dateA = new Date(a.month);
+                        const dateB = new Date(b.month);
+                        return dateA - dateB;
+                    });
+
+                    // Ambil 6 bulan terakhir
+                    return result.slice(-6);
+                },
+                async fetchPayments() {
+                    try {
+                        const response = await fetch('{{ route('payments') }}');
+                        if (!response.ok) throw new Error('Failed to fetch payments');
+
+                        const data = await response.json();
+
+                        if (data.success && data.payments) {
+                            this.payments = data.payments.map(payment => ({
+                                ...payment,
+                                amount: parseFloat(payment.amount)
+                            }));
+
+                            this.updateStats();
+                        } else {
+                            this.payments = [];
+                        }
+                    } catch (error) {
+                        console.error('Error fetching payments:', error);
+                        this.showNotification('error', 'Failed to load payments data.');
+                        this.payments = [];
+                    }
+                },
+
+                updateStats() {
+                    this.stats = {
+                        totalTenants: this.tenants.length,
+                        totalRooms: this.rooms.length,
+                        occupiedRooms: this.rooms.filter(r => r.available !== 1).length,
+                        occupancyRate: (this.rooms.filter(r => r.available !== 1).length / this.rooms.length) * 100,
+                        paidThisMonth: this.payments.filter(payment => payment.status === 'paid').length,
+                        totalPayments: this.payments.length,
+                        latePayments: this.payments.filter(payment => payment.status === 'late').length
+                    };
+                },
+
+                get totalPages() {
+                    return Math.ceil(this.filteredPayments.length / this.itemsPerPage);
+                },
+
+                get paginatedPayments() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    return this.filteredPayments.slice(start, end);
                 },
                 startFetching() {
                     if (this.fetchInterval) clearInterval(this.fetchInterval);

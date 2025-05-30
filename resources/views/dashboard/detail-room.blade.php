@@ -87,13 +87,6 @@
                 <!-- Actions - Right Side -->
                 <div class="flex-1 flex justify-end">
                     <div class="flex items-center space-x-3">
-                        <!-- Notification Bell -->
-                        <button class="p-2 rounded-full hover:bg-white/10 relative transition-colors duration-200">
-                            <i class="fas fa-bell text-lg text-white"></i>
-                            <span
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center transform translate-x-1 -translate-y-1">3</span>
-                        </button>
-
                         <!-- Message Button -->
                         <div x-data="{ dropdownOpen: false }" class="relative">
                             <button @click="dropdownOpen = !dropdownOpen"
@@ -147,20 +140,6 @@
                                 <a href="{{ route('profileuser') }}?previous={{ urlencode(request()->path()) }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 cursor-pointer">
                                     <i class="fas fa-user mr-2 text-gray-500"></i> Profile
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 cursor-pointer">
-                                    <i class="fas fa-history mr-2 text-gray-500"></i> History Penyewaan
-                                </a>
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 cursor-pointer">
-                                    <i class="fas fa-credit-card mr-2 text-gray-500"></i> Payment
-                                </a>
-                                <a href="#" @click.prevent="open = false; $dispatch('open-messages')"
-                                    id="profile-messages"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 cursor-pointer">
-                                    <i class="fas fa-envelope mr-2 text-gray-500"></i> Messages
-                                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
                                 </a>
                                 <div class="border-t border-gray-200"></div>
                                 <a href="{{ route('logout') }}"

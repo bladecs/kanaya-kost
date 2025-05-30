@@ -16,7 +16,7 @@ Route::get('/list-room', function () {
     return view('dashboard.list-room');
 })->name('listroom');
 
-Route::get('/detailroom', [CustomerController::class,'rooms'])->name('detailroom');
+Route::get('/detailroom', [CustomerController::class, 'rooms'])->name('detailroom');
 
 // Rute untuk GUEST (hanya bisa diakses jika BELUM LOGIN)
 Route::middleware(['guest'])->group(function () {
@@ -32,6 +32,8 @@ Route::middleware(['guest'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile-user', [CustomerController::class, 'profile'])->name('profileuser');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/update-profile', [AuthController::class, 'update'])->name('update.profile');
+    Route::post('/payment/verify', [CustomerController::class, 'verifyPayment'])->name('payment.verify.submit');
 });
 
 // Middleware group for admin
@@ -40,7 +42,9 @@ Route::middleware(['auth', 'IsAdmin'])->group(function () {
     Route::post('/add-room', [AdminController::class, 'store'])->name('room.store');
     Route::post('/update-room', [AdminController::class, 'update'])->name('room.update');
     Route::post('/delete-room', [AdminController::class, 'destroy'])->name('room.delete');
-    Route::get('/users',[AdminController::class, 'user'])->name('user');
+    Route::get('/users', [AdminController::class, 'user'])->name('user');
+    Route::get('/payment', [AdminController::class, 'payment'])->name('payments');
+    Route::post('/payments/verify/{payment_id}', [AdminController::class, 'verify_payment'])->name('payment.verify');
 });
 
 Route::get('/messages', [MessageController::class, 'index']);

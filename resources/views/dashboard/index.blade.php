@@ -141,61 +141,6 @@
                 <a href="#location" class="hover:text-amber-200 transition duration-300 font-medium">Location</a>
                 <a href="#contact" class="hover:text-amber-200 transition duration-300 font-medium">Contact</a>
                 @auth
-                    <!-- Notification Icon -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open"
-                            class="p-2 rounded-full hover:bg-amber-600 transition duration-300 relative">
-                            <i class="fas fa-bell text-lg"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                        <!-- Notification Dropdown -->
-                        <div x-show="open" @click.away="open = false"
-                            class="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg py-1 z-50 dropdown-menu"
-                            :class="{ 'show': open }">
-                            <div class="px-4 py-2 border-b border-gray-200">
-                                <h3 class="text-sm font-semibold text-gray-800">Notifications</h3>
-                            </div>
-                            <div class="max-h-60 overflow-y-auto">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 bg-amber-100 p-2 rounded-full">
-                                            <i class="fas fa-calendar-check text-amber-500"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="font-medium">Pembayaran diterima</p>
-                                            <p class="text-xs text-gray-500">2 menit yang lalu</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 bg-green-100 p-2 rounded-full">
-                                            <i class="fas fa-envelope text-green-600"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="font-medium">Pesan baru dari admin</p>
-                                            <p class="text-xs text-gray-500">1 jam yang lalu</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 bg-yellow-100 p-2 rounded-full">
-                                            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="font-medium">Pembayaran jatuh tempo</p>
-                                            <p class="text-xs text-gray-500">Kemarin</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="px-4 py-2 border-t border-gray-200">
-                                <a href="#" class="text-xs text-amber-500 hover:text-amber-800">Lihat semua
-                                    notifikasi</a>
-                            </div>
-                        </div>
-                    </div>
                     <!-- Di navbar -->
                     <div x-data="{ dropdownOpen: false }" class="relative">
                         <button @click="dropdownOpen = !dropdownOpen"

@@ -17,6 +17,11 @@ return new class extends Migration
             $table->unsignedBigInteger('room_id');
             $table->date('periode');
             $table->string('amount');
+            $table->string('payment_proof')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamp('verified_at')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users');
+            $table->text('rejection_reason')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
         });

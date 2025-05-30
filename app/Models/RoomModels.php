@@ -9,12 +9,12 @@ class RoomModels extends Model
 {
     protected $table = 'rooms';
     protected $fillable = [
-        'nama', 
-        'price', 
-        'lantai', 
+        'nama',
+        'price',
+        'lantai',
         'description',
         'tenant',
-        'available', 
+        'available',
         'rating'
     ];
 
@@ -32,5 +32,10 @@ class RoomModels extends Model
     }
     public function payment(){
         return $this->belongsTo(PaymentModel::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'tenant');
     }
 }

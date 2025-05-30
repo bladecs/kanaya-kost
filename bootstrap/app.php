@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsAdmin' => \App\Http\Middleware\IsAdmin::class,
         ]);
     })
+    ->withSchedule(function ($schedule) {
+        $schedule->command('payments:generate')
+                 ->monthlyOn(1, '00:00')
+                 ->timezone('Asia/Jakarta'); // Sesuaikan timezone
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
